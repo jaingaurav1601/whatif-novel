@@ -187,15 +187,21 @@ export default function Home() {
                   ✨ Explore mind-bending "What If" scenarios across iconic universes
                 </p>
                 <div className="flex justify-center gap-6">
-                  <div className="relative group cursor-pointer">
+                  <div className="relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                    <button className="relative px-10 py-4 bg-black rounded-full text-white font-bold text-lg group-hover:bg-slate-900 transition duration-300">
+                    <button 
+                      onClick={() => document.getElementById('universe-section')?.scrollIntoView({ behavior: 'smooth' })}
+                      className="relative px-10 py-4 bg-black rounded-full text-white font-bold text-lg group-hover:bg-slate-900 transition duration-300 cursor-pointer"
+                    >
                       🚀 Start Creating
                     </button>
                   </div>
-                  <button className="px-10 py-4 bg-white/10 hover:bg-white/20 backdrop-blur border border-white/30 text-white font-bold text-lg rounded-full transition duration-300">
+                  <Link 
+                    href="/history"
+                    className="px-10 py-4 bg-white/10 hover:bg-white/20 backdrop-blur border border-white/30 text-white font-bold text-lg rounded-full transition duration-300 cursor-pointer"
+                  >
                     📚 View Gallery
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -236,7 +242,7 @@ export default function Home() {
         )}
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12" id="universe-section">
           
           {/* Universe Cards */}
           <div className="lg:col-span-1">
@@ -349,14 +355,7 @@ export default function Home() {
             <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-0 group-hover/story:opacity-30 transition-opacity duration-500 pointer-events-none"></div>
             <div className="absolute -bottom-20 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-400 to-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-0 group-hover/story:opacity-25 transition-opacity duration-500 pointer-events-none"></div>
             
-            <div className={`bg-gradient-to-br ${colorClass.light} rounded-3xl p-1 shadow-2xl overflow-hidden relative transition-shadow duration-300 group-hover/story:shadow-xl`} style={{
-              boxShadow: 'var(--story-glow)',
-            }}>
-              <style jsx>{`
-                div:has(.group-hover\/story:opacity-30) {
-                  --story-glow: 0 0 40px rgba(6, 182, 212, 0.3);
-                }
-              `}</style>
+            <div className={`bg-gradient-to-br ${colorClass.light} rounded-3xl p-1 shadow-2xl overflow-hidden relative transition-shadow duration-300 group-hover/story:shadow-xl`}>
               <div className="bg-gradient-to-br from-white via-slate-50 to-white rounded-3xl overflow-hidden">
                 {/* Story Header with Visual Background */}
                 <div className={`bg-gradient-to-r ${colorClass.gradient} text-white p-12 relative overflow-hidden group/header`}>
