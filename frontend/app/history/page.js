@@ -130,12 +130,38 @@ export default function HistoryPage() {
           >
             ← Back
           </Link>
-          <h1 className="text-6xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-3">
-            📚 Story Archive
-          </h1>
-          <p className="text-slate-300 text-lg">
-            {stories.length} {stories.length === 1 ? 'story' : 'stories'} • Explore and revisit your created tales
-          </p>
+          
+          {/* Magical header section */}
+          <div className="relative rounded-2xl overflow-hidden mb-12 p-12 bg-gradient-to-r from-slate-800 via-purple-800 to-slate-800 border border-slate-700/50">
+            {/* Animated background elements */}
+            <div className="absolute inset-0">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-float animation-delay-2000"></div>
+              <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-float"></div>
+              {Array.from({ length: 20 }).map((_, i) => (
+                <div
+                  key={`star-${i}`}
+                  className="absolute rounded-full bg-white animate-twinkle"
+                  style={{
+                    width: Math.random() * 2 + 'px',
+                    height: Math.random() * 2 + 'px',
+                    left: Math.random() * 100 + '%',
+                    top: Math.random() * 100 + '%',
+                    opacity: Math.random() * 0.5 + 0.3,
+                    animationDelay: Math.random() * 3 + 's'
+                  }}
+                ></div>
+              ))}
+            </div>
+            
+            <div className="relative z-10">
+              <h1 className="text-6xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-3">
+                📚 Story Archive
+              </h1>
+              <p className="text-slate-300 text-lg">
+                {stories.length} {stories.length === 1 ? 'story' : 'stories'} • Explore and revisit your created tales
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Stats Showcase */}
@@ -403,6 +429,16 @@ export default function HistoryPage() {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.7; }
         }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          25% { transform: translateY(-30px) translateX(10px); }
+          50% { transform: translateY(-60px) translateX(20px); }
+          75% { transform: translateY(-30px) translateX(10px); }
+        }
         .animate-blob {
           animation: blob 7s infinite;
         }
@@ -420,6 +456,12 @@ export default function HistoryPage() {
         }
         .animate-pulse-soft {
           animation: pulse-soft 2s ease-in-out infinite;
+        }
+        .animate-twinkle {
+          animation: twinkle 3s ease-in-out infinite;
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
         }
       `}</style>
     </main>

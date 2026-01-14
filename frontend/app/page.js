@@ -124,17 +124,89 @@ export default function Home() {
         </div>
 
         {/* Hero Section */}
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-6xl md:text-7xl font-black mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Reimagine
-            </span>
-            <br />
-            <span className="text-white">Your Favorite Stories</span>
-          </h2>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-8">
-            Explore mind-bending "What If" scenarios across iconic universes. Let AI weave tales of alternate realities.
-          </p>
+        <div className="mb-16">
+          {/* Animated magical background */}
+          <div className="relative h-[600px] rounded-3xl overflow-hidden mb-12 group">
+            {/* Multi-layered animated background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-950"></div>
+            
+            {/* Animated starfield */}
+            <div className="absolute inset-0">
+              {Array.from({ length: 50 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full bg-white animate-twinkle"
+                  style={{
+                    width: Math.random() * 3 + 'px',
+                    height: Math.random() * 3 + 'px',
+                    left: Math.random() * 100 + '%',
+                    top: Math.random() * 100 + '%',
+                    opacity: Math.random() * 0.7 + 0.3,
+                    animationDelay: Math.random() * 3 + 's',
+                    boxShadow: `0 0 ${Math.random() * 20 + 10}px rgba(255, 255, 255, ${Math.random() * 0.5})`
+                  }}
+                ></div>
+              ))}
+            </div>
+
+            {/* Animated gradient orbs */}
+            <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-float"></div>
+            <div className="absolute bottom-0 right-10 w-96 h-96 bg-cyan-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-float animation-delay-3000"></div>
+            <div className="absolute top-1/2 left-1/3 w-80 h-80 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl opacity-15 animate-pulse-large"></div>
+
+            {/* Floating particles */}
+            <div className="absolute inset-0">
+              {Array.from({ length: 30 }).map((_, i) => (
+                <div
+                  key={`particle-${i}`}
+                  className="absolute rounded-full bg-gradient-to-r from-cyan-400 to-purple-400 animate-float-particle"
+                  style={{
+                    width: Math.random() * 4 + 2 + 'px',
+                    height: Math.random() * 4 + 2 + 'px',
+                    left: Math.random() * 100 + '%',
+                    top: Math.random() * 100 + '%',
+                    opacity: Math.random() * 0.6,
+                    animationDuration: Math.random() * 10 + 5 + 's',
+                    animationDelay: Math.random() * 2 + 's'
+                  }}
+                ></div>
+              ))}
+            </div>
+
+            {/* Content overlay */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-10 backdrop-blur-sm">
+              <div className="animate-fade-in-slow">
+                <h2 className="text-7xl md:text-8xl font-black mb-8 leading-tight">
+                  <span className="bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent drop-shadow-2xl">
+                    Reimagine
+                  </span>
+                  <br />
+                  <span className="text-white drop-shadow-lg">Your Stories</span>
+                </h2>
+                <p className="text-2xl text-slate-200 max-w-2xl mx-auto mb-10 drop-shadow-lg">
+                  ✨ Explore mind-bending "What If" scenarios across iconic universes
+                </p>
+                <div className="flex justify-center gap-6">
+                  <div className="relative group cursor-pointer">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <button className="relative px-10 py-4 bg-black rounded-full text-white font-bold text-lg group-hover:bg-slate-900 transition duration-300">
+                      🚀 Start Creating
+                    </button>
+                  </div>
+                  <button className="px-10 py-4 bg-white/10 hover:bg-white/20 backdrop-blur border border-white/30 text-white font-bold text-lg rounded-full transition duration-300">
+                    📚 View Gallery
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Divider with glow */}
+          <div className="flex items-center justify-center gap-4 my-16">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+            <span className="text-cyan-400 text-2xl">✨</span>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+          </div>
         </div>
 
         {/* Stats Showcase */}
@@ -403,6 +475,10 @@ export default function Home() {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes fade-in-slow {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
         @keyframes slide-up {
           from { opacity: 0; transform: translateY(40px); }
           to { opacity: 1; transform: translateY(0); }
@@ -411,11 +487,44 @@ export default function Home() {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.7; }
         }
+        @keyframes pulse-large {
+          0%, 100% { transform: scale(1); opacity: 0.15; }
+          50% { transform: scale(1.1); opacity: 0.25; }
+        }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          25% { transform: translateY(-30px) translateX(10px); }
+          50% { transform: translateY(-60px) translateX(20px); }
+          75% { transform: translateY(-30px) translateX(10px); }
+        }
+        @keyframes float-particle {
+          0% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.6;
+          }
+          90% {
+            opacity: 0.6;
+          }
+          100% {
+            transform: translateY(-100vh) translateX(100px);
+            opacity: 0;
+          }
+        }
         .animate-blob {
           animation: blob 7s infinite;
         }
         .animation-delay-2000 {
           animation-delay: 2s;
+        }
+        .animation-delay-3000 {
+          animation-delay: 3s;
         }
         .animation-delay-4000 {
           animation-delay: 4s;
@@ -423,11 +532,26 @@ export default function Home() {
         .animate-fade-in {
           animation: fade-in 0.8s ease-out;
         }
+        .animate-fade-in-slow {
+          animation: fade-in-slow 1.2s ease-out;
+        }
         .animate-slide-up {
           animation: slide-up 0.6s ease-out;
         }
         .animate-pulse-soft {
           animation: pulse-soft 2s ease-in-out infinite;
+        }
+        .animate-pulse-large {
+          animation: pulse-large 4s ease-in-out infinite;
+        }
+        .animate-twinkle {
+          animation: twinkle 3s ease-in-out infinite;
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+        .animate-float-particle {
+          animation: float-particle linear infinite;
         }
       `}</style>
     </main>
