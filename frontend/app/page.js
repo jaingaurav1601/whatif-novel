@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getUniverses, generateStory, rateStory } from '@/lib/api';
+import { getUniverses, generateStory, rateStory, getStoryHistory } from '@/lib/api';
 import Link from 'next/link';
 
 const universeEmojis = {
@@ -27,6 +27,7 @@ export default function Home() {
   const [story, setStory] = useState(null);
   const [error, setError] = useState('');
   const [ratingLoading, setRatingLoading] = useState(false);
+  const [stories, setStories] = useState([]);
 
   useEffect(() => {
     getUniverses().then(data => {
@@ -34,6 +35,12 @@ export default function Home() {
       if (data.universes.length > 0) {
         setSelectedUniverse(data.universes[0]);
       }
+    });
+    // Fetch stories to calculate average ratings
+    getStoryHistory(1000).then(data => {
+      setStories(data.stories || []);
+    }).catch(() => {
+      setStories([]);
     });
   }, []);
 
@@ -75,6 +82,23 @@ export default function Home() {
 
   const colorClass = universeColors[selectedUniverse] || universeColors['Harry Potter'];
 
+  // Calculate rating statistics
+  const getRatingStats = () => {
+    const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    let total = 0;
+    stories.forEach(s => {
+      if (s.rating > 0) {
+        counts[s.rating]++;
+        total += s.rating;
+      }
+    });
+    const totalRatings = Object.values(counts).reduce((a, b) => a + b, 0);
+    const average = totalRatings > 0 ? (total / totalRatings).toFixed(1) : 0;
+    return { counts, average, totalRatings };
+  };
+
+  const ratingStats = getRatingStats();
+
   return (
     <main className="min-h-screen bg-slate-950 text-white overflow-hidden">
       {/* Animated background */}
@@ -112,6 +136,27 @@ export default function Home() {
             Explore mind-bending "What If" scenarios across iconic universes. Let AI weave tales of alternate realities.
           </p>
         </div>
+
+        {/* Stats Showcase */}
+        {stories.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 text-center group hover:border-cyan-500/50 transition">
+              <div className="text-4xl mb-3">📚</div>
+              <div className="text-3xl font-black text-cyan-400">{stories.length}</div>
+              <div className="text-slate-400 text-sm">Stories Created</div>
+            </div>
+            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 text-center group hover:border-cyan-500/50 transition">
+              <div className="text-4xl mb-3">⭐</div>
+              <div className="text-3xl font-black text-amber-400">{ratingStats.average}</div>
+              <div className="text-slate-400 text-sm">Average Rating</div>
+            </div>
+            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 text-center group hover:border-cyan-500/50 transition">
+              <div className="text-4xl mb-3">📝</div>
+              <div className="text-3xl font-black text-purple-400">{stories.reduce((sum, s) => sum + s.word_count, 0).toLocaleString()}</div>
+              <div className="text-slate-400 text-sm">Total Words Written</div>
+            </div>
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
@@ -213,58 +258,133 @@ export default function Home() {
         {/* Story Display */}
         {story && (
           <div className="animate-slide-up">
-            <div className={`bg-gradient-to-br ${colorClass.light} rounded-2xl p-1 shadow-2xl`}>
-              <div className="bg-white rounded-2xl p-12 shadow-2xl">
-                <div className="mb-8">
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <div className="text-5xl mb-4">{universeEmojis[story.universe]}</div>
-                      <span className={`inline-block bg-gradient-to-r ${colorClass.gradient} text-white px-4 py-2 rounded-full text-sm font-bold mb-3 shadow-lg`}>
-                        {story.universe}
-                      </span>
-                      <h2 className="text-4xl font-black text-slate-900 leading-tight">
-                        What if {story.what_if}?
-                      </h2>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-4xl font-black text-slate-900">{story.word_count}</div>
-                      <div className="text-sm text-slate-600">words</div>
+            <div className={`bg-gradient-to-br ${colorClass.light} rounded-3xl p-1 shadow-2xl overflow-hidden`}>
+              <div className="bg-gradient-to-br from-white via-slate-50 to-white rounded-3xl overflow-hidden">
+                {/* Story Header with Visual Background */}
+                <div className={`bg-gradient-to-r ${colorClass.gradient} text-white p-12 relative overflow-hidden`}>
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48"></div>
+                  <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full -ml-40 -mb-40"></div>
+                  <div className="relative z-10">
+                    <div className="text-7xl mb-6 drop-shadow-lg">{universeEmojis[story.universe]}</div>
+                    <span className="inline-block bg-white/20 backdrop-blur text-white px-4 py-2 rounded-full text-sm font-bold mb-4 shadow-lg border border-white/30">
+                      {story.universe}
+                    </span>
+                    <h2 className="text-5xl font-black leading-tight mb-4">
+                      What if {story.what_if}?
+                    </h2>
+                    <div className="flex gap-8 items-center text-lg">
+                      <div className="flex items-center gap-2">
+                        <span className="text-3xl">📖</span>
+                        <div>
+                          <div className="font-black text-2xl">{story.word_count}</div>
+                          <div className="text-sm opacity-90">words</div>
+                        </div>
+                      </div>
+                      <div className="h-12 w-px bg-white/30"></div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-4xl font-black">{story.rating}</div>
+                        <div className="text-2xl">⭐</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                
-                <div className="prose prose-lg max-w-none mb-10">
-                  {story.story.split('\n').map((paragraph, i) => (
-                    <p key={i} className="mb-6 text-slate-700 leading-relaxed text-lg">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
 
-                <div className="pt-8 border-t-2 border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-6">
-                  <Link 
-                    href="/history"
-                    className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-full transition transform hover:scale-105 shadow-lg shadow-blue-500/30"
-                  >
-                    📚 All Stories
-                  </Link>
-                  <div className="flex gap-3">
-                    <span className="text-sm text-slate-600 font-semibold">Rate:</span>
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map(rating => (
-                        <button
-                          key={rating}
-                          onClick={() => handleRating(rating)}
-                          disabled={ratingLoading}
-                          className={`text-4xl transition duration-200 cursor-pointer select-none transform ${
-                            rating <= story.rating ? 'opacity-100 drop-shadow-lg' : 'opacity-30'
-                          } hover:opacity-100 hover:scale-125 active:scale-110 disabled:cursor-not-allowed`}
-                          title={`Rate ${rating} star${rating > 1 ? 's' : ''}`}
-                        >
-                          ⭐
-                        </button>
-                      ))}
+                <div className="p-12">
+                  {/* Story Content */}
+                  <div className="prose prose-lg max-w-none mb-12">
+                    {story.story.split('\n').map((paragraph, i) => (
+                      <p key={i} className="mb-6 text-slate-700 leading-relaxed text-lg">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+
+                  {/* Rating & Stats Section */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-8 border-t-2 border-slate-200">
+                    {/* Rating Breakdown */}
+                    <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-8 border border-slate-200">
+                      <h3 className="text-2xl font-black text-slate-900 mb-6">📊 Community Ratings</h3>
+                      <div className="space-y-3">
+                        {[5, 4, 3, 2, 1].map(stars => {
+                          const count = ratingStats.counts[stars];
+                          const percentage = ratingStats.totalRatings > 0 ? (count / ratingStats.totalRatings) * 100 : 0;
+                          return (
+                            <div key={stars} className="flex items-center gap-4">
+                              <div className="flex gap-1 text-xl">
+                                {'⭐'.repeat(stars)}<span className="text-slate-300">{'⭐'.repeat(5 - stars)}</span>
+                              </div>
+                              <div className="flex-1">
+                                <div className="bg-slate-300 rounded-full h-2 overflow-hidden">
+                                  <div 
+                                    className={`h-full bg-gradient-to-r ${colorClass.gradient} transition-all duration-500`}
+                                    style={{ width: `${percentage}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold text-slate-900">{count}</div>
+                                <div className="text-xs text-slate-600">{percentage.toFixed(0)}%</div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="mt-6 pt-6 border-t border-slate-300 flex justify-between items-center">
+                        <div>
+                          <div className="text-sm text-slate-600 font-semibold">Average Rating</div>
+                          <div className="text-4xl font-black text-slate-900">{ratingStats.average}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-slate-600 font-semibold">Total Ratings</div>
+                          <div className="text-3xl font-black text-slate-900">{ratingStats.totalRatings}</div>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Rate This Story */}
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-8 border border-blue-200 flex flex-col justify-between">
+                      <div>
+                        <h3 className="text-2xl font-black text-slate-900 mb-6">⭐ Rate This Story</h3>
+                        <p className="text-slate-600 mb-6">What do you think of this tale? Share your rating!</p>
+                      </div>
+                      <div className="flex justify-center gap-3">
+                        {[1, 2, 3, 4, 5].map(rating => (
+                          <button
+                            key={rating}
+                            onClick={() => handleRating(rating)}
+                            disabled={ratingLoading}
+                            className={`text-6xl transition duration-300 cursor-pointer select-none transform hover:scale-125 active:scale-110 disabled:cursor-not-allowed ${
+                              rating <= story.rating ? 'drop-shadow-lg animate-pulse-soft' : 'opacity-40 hover:opacity-80'
+                            }`}
+                            title={`Rate ${rating} star${rating > 1 ? 's' : ''}`}
+                          >
+                            ⭐
+                          </button>
+                        ))}
+                      </div>
+                      {story.rating > 0 && (
+                        <div className="text-center mt-6 pt-6 border-t border-blue-200">
+                          <p className="text-sm text-slate-600">Your rating:</p>
+                          <p className="text-2xl font-black text-blue-600">{'⭐'.repeat(story.rating)}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bottom CTA */}
+                  <div className="mt-12 flex gap-4 justify-center">
+                    <Link 
+                      href="/history"
+                      className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-full transition transform hover:scale-105 shadow-lg shadow-blue-500/30"
+                    >
+                      📚 All Stories
+                    </Link>
+                    <button
+                      onClick={() => setStory(null)}
+                      className="px-8 py-4 bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold rounded-full transition transform hover:scale-105"
+                    >
+                      ✨ Create Another
+                    </button>
                   </div>
                 </div>
               </div>
@@ -287,6 +407,10 @@ export default function Home() {
           from { opacity: 0; transform: translateY(40px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes pulse-soft {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
         .animate-blob {
           animation: blob 7s infinite;
         }
@@ -301,6 +425,9 @@ export default function Home() {
         }
         .animate-slide-up {
           animation: slide-up 0.6s ease-out;
+        }
+        .animate-pulse-soft {
+          animation: pulse-soft 2s ease-in-out infinite;
         }
       `}</style>
     </main>
