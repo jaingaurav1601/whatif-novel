@@ -68,9 +68,15 @@ export default function Home() {
           <h1 className="text-6xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
             What If Novel AI
           </h1>
-          <p className="text-xl text-slate-300">
+          <p className="text-xl text-slate-300 mb-6">
             Explore alternative storylines in your favorite universes
           </p>
+          <Link 
+            href="/history"
+            className="inline-block px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold rounded-lg transition shadow-lg shadow-blue-500/20"
+          >
+            📚 View Story History
+          </Link>
         </div>
 
         {/* Generator Form */}
@@ -184,19 +190,20 @@ export default function Home() {
             <div className="mt-8 pt-6 border-t border-slate-200 flex justify-between items-center">
               <Link 
                 href="/history"
-                className="text-cyan-600 hover:text-cyan-700 font-semibold transition"
+                className="px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold rounded-lg transition shadow-lg shadow-blue-500/20"
               >
-                ← See all stories
+                📚 Story History
               </Link>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map(rating => (
                   <button
                     key={rating}
                     onClick={() => handleRating(rating)}
                     disabled={ratingLoading}
-                    className={`text-2xl transition ${
+                    className={`text-3xl transition duration-200 cursor-pointer select-none ${
                       rating <= story.rating ? 'opacity-100' : 'opacity-40'
-                    } hover:scale-110 disabled:cursor-not-allowed`}
+                    } hover:opacity-100 hover:scale-125 active:scale-110 disabled:cursor-not-allowed`}
+                    title={`Rate ${rating} star${rating > 1 ? 's' : ''}`}
                   >
                     ⭐
                   </button>

@@ -84,7 +84,7 @@ export default function HistoryPage() {
         <div className="mb-8">
           <Link 
             href="/"
-            className="text-cyan-400 hover:text-cyan-300 font-semibold mb-4 inline-block transition"
+            className="inline-block px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-cyan-400 hover:text-cyan-300 font-semibold rounded-lg mb-4 transition border border-slate-600/30"
           >
             ← Back to Generator
           </Link>
@@ -92,7 +92,7 @@ export default function HistoryPage() {
             Story History
           </h1>
           <p className="text-slate-400">
-            {stories.length} {stories.length === 1 ? 'story' : 'stories'} generated
+            {stories.length} {stories.length === 1 ? 'story' : 'stories'} generated • Explore your creations and revisit your favorite tales
           </p>
         </div>
 
@@ -213,15 +213,16 @@ export default function HistoryPage() {
                 <div className="pt-6 border-t border-slate-200">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-600 font-semibold">Rate this story:</span>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map(rating => (
                         <button
                           key={rating}
                           onClick={() => handleRating(rating)}
                           disabled={ratingLoading}
-                          className={`text-3xl transition ${
+                          className={`text-3xl transition duration-200 cursor-pointer select-none ${
                             rating <= selectedStory.rating ? 'opacity-100' : 'opacity-40'
-                          } hover:scale-110 disabled:cursor-not-allowed`}
+                          } hover:opacity-100 hover:scale-125 active:scale-110 disabled:cursor-not-allowed`}
+                          title={`Rate ${rating} star${rating > 1 ? 's' : ''}`}
                         >
                           ⭐
                         </button>
