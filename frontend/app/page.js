@@ -82,6 +82,14 @@ export default function Home() {
     try {
       const result = await generateStory(selectedUniverse, whatIf, length);
       setStory(result);
+      
+      // Scroll to story display after it's generated
+      setTimeout(() => {
+        const storySection = document.getElementById('story-section');
+        if (storySection) {
+          storySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     } catch (err) {
       setError('Failed to generate story. Please try again.');
     } finally {
