@@ -44,6 +44,3 @@ Thumbs.db
 coverage/
 .pytest_cache/
 .tox/
-
-# Frontend - separate project
-frontend/
