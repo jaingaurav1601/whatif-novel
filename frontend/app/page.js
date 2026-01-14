@@ -212,21 +212,26 @@ export default function Home() {
         {/* Stats Showcase */}
         {stories.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 text-center group hover:border-cyan-500/50 transition">
-              <div className="text-4xl mb-3">📚</div>
-              <div className="text-3xl font-black text-cyan-400">{stories.length}</div>
-              <div className="text-slate-400 text-sm">Stories Created</div>
-            </div>
-            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 text-center group hover:border-cyan-500/50 transition">
-              <div className="text-4xl mb-3">⭐</div>
-              <div className="text-3xl font-black text-amber-400">{ratingStats.average}</div>
-              <div className="text-slate-400 text-sm">Average Rating</div>
-            </div>
-            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 text-center group hover:border-cyan-500/50 transition">
-              <div className="text-4xl mb-3">📝</div>
-              <div className="text-3xl font-black text-purple-400">{stories.reduce((sum, s) => sum + s.word_count, 0).toLocaleString()}</div>
-              <div className="text-slate-400 text-sm">Total Words Written</div>
-            </div>
+            {[
+              { icon: '📚', value: stories.length, label: 'Stories Created', color: 'cyan' },
+              { icon: '⭐', value: ratingStats.average, label: 'Average Rating', color: 'amber' },
+              { icon: '📝', value: stories.reduce((sum, s) => sum + s.word_count, 0).toLocaleString(), label: 'Total Words Written', color: 'purple' }
+            ].map((stat, idx) => (
+              <div 
+                key={stat.label}
+                className={`bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 text-center group hover:border-${stat.color}-500/50 transition transform hover:scale-105 hover:shadow-lg hover:shadow-${stat.color}-500/20 animate-scale-in`}
+                style={{ animationDelay: `${idx * 150}ms` }}
+              >
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-10 rounded-2xl animate-shimmer"></div>
+                
+                <div className="relative z-10">
+                  <div className="text-4xl mb-3 group-hover:animate-bounce">{stat.icon}</div>
+                  <div className={`text-3xl font-black text-${stat.color}-400`}>{stat.value}</div>
+                  <div className="text-slate-400 text-sm">{stat.label}</div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -237,18 +242,24 @@ export default function Home() {
           <div className="lg:col-span-1">
             <h3 className="text-2xl font-bold mb-6 text-cyan-400">Select Universe</h3>
             <div className="space-y-4">
-              {universes.map(u => (
+              {universes.map((u, idx) => (
                 <button
                   key={u}
                   onClick={() => setSelectedUniverse(u)}
-                  className={`w-full p-4 rounded-xl transition transform hover:scale-105 duration-300 border-2 group ${
+                  className={`w-full p-4 rounded-xl transition transform hover:scale-105 duration-300 border-2 group relative overflow-hidden animate-scale-in ${
                     selectedUniverse === u
                       ? `bg-gradient-to-r ${colorClass.gradient} border-transparent shadow-lg shadow-blue-500/50`
                       : 'bg-slate-800/50 border-slate-700 hover:border-slate-600 hover:bg-slate-700/50'
                   }`}
+                  style={{ animationDelay: `${idx * 100}ms` }}
                 >
-                  <div className="text-3xl mb-2">{universeEmojis[u]}</div>
-                  <div className="font-bold text-lg">{u}</div>
+                  {/* Animated shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 animate-shimmer"></div>
+                  
+                  <div className="relative z-10 flex items-center gap-3">
+                    <div className="text-3xl group-hover:animate-bounce">{universeEmojis[u]}</div>
+                    <div className="font-bold text-lg text-left">{u}</div>
+                  </div>
                 </button>
               ))}
             </div>
@@ -256,11 +267,11 @@ export default function Home() {
 
           {/* Generator Form */}
           <div className="lg:col-span-2">
-            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl">
+            <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl group hover:shadow-cyan-500/20 transition-shadow duration-300">
               <form onSubmit={handleGenerate} className="space-y-6">
                 
                 {/* What If Input */}
-                <div>
+                <div className="group/input">
                   <label className="block text-cyan-400 font-bold mb-3">
                     ✨ What If Scenario
                   </label>
@@ -268,7 +279,7 @@ export default function Home() {
                     value={whatIf}
                     onChange={(e) => setWhatIf(e.target.value)}
                     placeholder="What if Harry Potter discovered he was actually a Muggle? What if Gandalf never came to Middle-earth?"
-                    className="w-full px-4 py-4 rounded-xl bg-slate-900/50 text-white placeholder-slate-500 border-2 border-slate-700 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 min-h-[120px] transition resize-none"
+                    className="w-full px-4 py-4 rounded-xl bg-slate-900/50 text-white placeholder-slate-500 border-2 border-slate-700 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 min-h-[120px] transition resize-none group-focus-within/input:border-cyan-400 group-focus-within/input:shadow-lg group-focus-within/input:shadow-cyan-500/20"
                   />
                 </div>
 
@@ -278,16 +289,17 @@ export default function Home() {
                     📖 Story Length
                   </label>
                   <div className="grid grid-cols-3 gap-3">
-                    {['short', 'medium', 'long'].map(l => (
+                    {['short', 'medium', 'long'].map((l, idx) => (
                       <button
                         key={l}
                         type="button"
                         onClick={() => setLength(l)}
-                        className={`py-3 rounded-lg font-bold transition transform hover:scale-105 duration-300 ${
+                        className={`py-3 rounded-lg font-bold transition transform hover:scale-105 duration-300 relative overflow-hidden animate-scale-in ${
                           length === l
                             ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/50 scale-105'
                             : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600'
                         }`}
+                        style={{ animationDelay: `${idx * 50}ms` }}
                       >
                         {l === 'short' && '🎯'}
                         {l === 'medium' && '📚'}
@@ -302,23 +314,26 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold py-4 rounded-xl hover:from-cyan-600 hover:via-blue-600 hover:to-purple-600 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 shadow-lg shadow-cyan-500/30 duration-300"
+                  className="w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold py-4 rounded-xl hover:from-cyan-600 hover:via-blue-600 hover:to-purple-600 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 shadow-lg shadow-cyan-500/30 duration-300 group relative overflow-hidden"
                 >
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      ✨ Weaving Reality...
-                    </span>
-                  ) : (
-                    '⚡ Generate Story'
-                  )}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 animate-shimmer-fast"></div>
+                  <span className="relative z-10">
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        ✨ Weaving Reality...
+                      </span>
+                    ) : (
+                      '⚡ Generate Story'
+                    )}
+                  </span>
                 </button>
 
                 {error && (
-                  <div className="bg-red-500/20 border-2 border-red-500/50 text-red-300 px-4 py-3 rounded-xl">
+                  <div className="bg-red-500/20 border-2 border-red-500/50 text-red-300 px-4 py-3 rounded-xl animate-shake">
                     {error}
                   </div>
                 )}
@@ -329,15 +344,29 @@ export default function Home() {
 
         {/* Story Display */}
         {story && (
-          <div className="animate-slide-up">
-            <div className={`bg-gradient-to-br ${colorClass.light} rounded-3xl p-1 shadow-2xl overflow-hidden`}>
+          <div className="animate-slide-up relative group/story">
+            {/* Decorative wrapper orbs */}
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-0 group-hover/story:opacity-30 transition-opacity duration-500 pointer-events-none"></div>
+            <div className="absolute -bottom-20 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-400 to-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-0 group-hover/story:opacity-25 transition-opacity duration-500 pointer-events-none"></div>
+            
+            <div className={`bg-gradient-to-br ${colorClass.light} rounded-3xl p-1 shadow-2xl overflow-hidden relative transition-shadow duration-300 group-hover/story:shadow-xl`} style={{
+              boxShadow: 'var(--story-glow)',
+            }}>
+              <style jsx>{`
+                div:has(.group-hover\/story:opacity-30) {
+                  --story-glow: 0 0 40px rgba(6, 182, 212, 0.3);
+                }
+              `}</style>
               <div className="bg-gradient-to-br from-white via-slate-50 to-white rounded-3xl overflow-hidden">
                 {/* Story Header with Visual Background */}
-                <div className={`bg-gradient-to-r ${colorClass.gradient} text-white p-12 relative overflow-hidden`}>
-                  <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48"></div>
-                  <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full -ml-40 -mb-40"></div>
+                <div className={`bg-gradient-to-r ${colorClass.gradient} text-white p-12 relative overflow-hidden group/header`}>
+                  {/* Animated gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover/header:opacity-10 animate-shimmer"></div>
+                  
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-48 -mt-48 group-hover/header:animate-float"></div>
+                  <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full -ml-40 -mb-40 group-hover/header:animate-float animation-delay-2000"></div>
                   <div className="relative z-10">
-                    <div className="text-7xl mb-6 drop-shadow-lg">{universeEmojis[story.universe]}</div>
+                    <div className="text-7xl mb-6 drop-shadow-lg group-hover/header:animate-bounce">{universeEmojis[story.universe]}</div>
                     <span className="inline-block bg-white/20 backdrop-blur text-white px-4 py-2 rounded-full text-sm font-bold mb-4 shadow-lg border border-white/30">
                       {story.universe}
                     </span>
@@ -365,7 +394,7 @@ export default function Home() {
                   {/* Story Content */}
                   <div className="prose prose-lg max-w-none mb-12">
                     {story.story.split('\n').map((paragraph, i) => (
-                      <p key={i} className="mb-6 text-slate-700 leading-relaxed text-lg">
+                      <p key={i} className="mb-6 text-slate-700 leading-relaxed text-lg animate-fade-in" style={{ animationDelay: `${i * 50}ms` }}>
                         {paragraph}
                       </p>
                     ))}
@@ -374,14 +403,14 @@ export default function Home() {
                   {/* Rating & Stats Section */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-8 border-t-2 border-slate-200">
                     {/* Rating Breakdown */}
-                    <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-8 border border-slate-200">
+                    <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-8 border border-slate-200 group/stats hover:shadow-lg hover:shadow-slate-300/30 transition-shadow duration-300">
                       <h3 className="text-2xl font-black text-slate-900 mb-6">📊 Community Ratings</h3>
                       <div className="space-y-3">
-                        {[5, 4, 3, 2, 1].map(stars => {
+                        {[5, 4, 3, 2, 1].map((stars, idx) => {
                           const count = ratingStats.counts[stars];
                           const percentage = ratingStats.totalRatings > 0 ? (count / ratingStats.totalRatings) * 100 : 0;
                           return (
-                            <div key={stars} className="flex items-center gap-4">
+                            <div key={stars} className="flex items-center gap-4 animate-scale-in" style={{ animationDelay: `${idx * 50}ms` }}>
                               <div className="flex gap-1 text-xl">
                                 {'⭐'.repeat(stars)}<span className="text-slate-300">{'⭐'.repeat(5 - stars)}</span>
                               </div>
@@ -414,13 +443,13 @@ export default function Home() {
                     </div>
 
                     {/* Rate This Story */}
-                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-8 border border-blue-200 flex flex-col justify-between">
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-8 border border-blue-200 flex flex-col justify-between group/rating hover:shadow-lg hover:shadow-blue-300/30 transition-shadow duration-300">
                       <div>
                         <h3 className="text-2xl font-black text-slate-900 mb-6">⭐ Rate This Story</h3>
                         <p className="text-slate-600 mb-6">What do you think of this tale? Share your rating!</p>
                       </div>
                       <div className="flex justify-center gap-3">
-                        {[1, 2, 3, 4, 5].map(rating => (
+                        {[1, 2, 3, 4, 5].map((rating) => (
                           <button
                             key={rating}
                             onClick={() => handleRating(rating)}
@@ -435,7 +464,7 @@ export default function Home() {
                         ))}
                       </div>
                       {story.rating > 0 && (
-                        <div className="text-center mt-6 pt-6 border-t border-blue-200">
+                        <div className="text-center mt-6 pt-6 border-t border-blue-200 animate-scale-in">
                           <p className="text-sm text-slate-600">Your rating:</p>
                           <p className="text-2xl font-black text-blue-600">{'⭐'.repeat(story.rating)}</p>
                         </div>
@@ -447,15 +476,17 @@ export default function Home() {
                   <div className="mt-12 flex gap-4 justify-center">
                     <Link 
                       href="/history"
-                      className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-full transition transform hover:scale-105 shadow-lg shadow-blue-500/30"
+                      className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold rounded-full transition transform hover:scale-105 shadow-lg shadow-blue-500/30 group/btn relative overflow-hidden"
                     >
-                      📚 All Stories
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover/btn:opacity-20 animate-shimmer-fast"></div>
+                      <span className="relative z-10">📚 All Stories</span>
                     </Link>
                     <button
                       onClick={() => setStory(null)}
-                      className="px-8 py-4 bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold rounded-full transition transform hover:scale-105"
+                      className="px-8 py-4 bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold rounded-full transition transform hover:scale-105 group/btn2 relative overflow-hidden"
                     >
-                      ✨ Create Another
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover/btn2:opacity-20 animate-shimmer-fast"></div>
+                      <span className="relative z-10">✨ Create Another</span>
                     </button>
                   </div>
                 </div>
@@ -517,6 +548,29 @@ export default function Home() {
             opacity: 0;
           }
         }
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes shimmer-fast {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes scale-in {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+          20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
         .animate-blob {
           animation: blob 7s infinite;
         }
@@ -552,6 +606,18 @@ export default function Home() {
         }
         .animate-float-particle {
           animation: float-particle linear infinite;
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+        .animate-shimmer-fast {
+          animation: shimmer-fast 1.5s infinite;
+        }
+        .animate-scale-in {
+          animation: scale-in 0.6s ease-out;
+        }
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
         }
       `}</style>
     </main>
