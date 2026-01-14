@@ -26,6 +26,29 @@ export default function HistoryPage() {
   const [ratingLoading, setRatingLoading] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   const [filterUniverse, setFilterUniverse] = useState('all');
+  const [visibleSections, setVisibleSections] = useState({});
+
+  // Intersection Observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            setVisibleSections(prev => ({ ...prev, [entry.target.id]: true }));
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const sections = document.querySelectorAll('[data-scroll-animate]');
+    sections.forEach(section => observer.observe(section));
+
+    return () => {
+      sections.forEach(section => observer.unobserve(section));
+    };
+  }, []);
 
   useEffect(() => {
     fetchStories();
@@ -237,7 +260,7 @@ export default function HistoryPage() {
             </div>
 
             {/* Stories List */}
-            <div className="mt-6 space-y-3 max-h-[80vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
+            <div className="mt-6 space-y-3 max-h-[80vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800" id="stories-list" data-scroll-animate>
               {processedStories.length === 0 ? (
                 <div className="text-slate-400 text-center py-8">
                   {stories.length === 0 ? '✨ No stories yet' : '🔍 No matches found'}
@@ -462,6 +485,16 @@ export default function HistoryPage() {
         }
         .animate-float {
           animation: float 6s ease-in-out infinite;
+        }
+        /* Scroll animation state */
+        [data-scroll-animate] {
+          opacity: 0;
+          transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+          transform: translateY(20px);
+        }
+        [data-scroll-animate].visible {
+          opacity: 1;
+          transform: translateY(0);
         }
       `}</style>
     </main>
