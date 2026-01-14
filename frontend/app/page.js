@@ -28,6 +28,29 @@ export default function Home() {
   const [error, setError] = useState('');
   const [ratingLoading, setRatingLoading] = useState(false);
   const [stories, setStories] = useState([]);
+  const [visibleSections, setVisibleSections] = useState({});
+
+  // Intersection Observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            setVisibleSections(prev => ({ ...prev, [entry.target.id]: true }));
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const sections = document.querySelectorAll('[data-scroll-animate]');
+    sections.forEach(section => observer.observe(section));
+
+    return () => {
+      sections.forEach(section => observer.unobserve(section));
+    };
+  }, []);
 
   useEffect(() => {
     getUniverses().then(data => {
@@ -216,7 +239,7 @@ export default function Home() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12" id="universe-section">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12" id="universe-section" data-scroll-animate>
           
           {/* Universe Cards */}
           <div className="lg:col-span-1">
@@ -228,7 +251,7 @@ export default function Home() {
                   onClick={() => setSelectedUniverse(u)}
                   className={`w-full p-4 rounded-xl transition transform hover:scale-105 duration-300 border-2 group relative overflow-hidden animate-scale-in ${
                     selectedUniverse === u
-                      ? `bg-gradient-to-r ${colorClass.gradient} border-transparent shadow-lg shadow-blue-500/50`
+                      ? `bg-gradient-to-r ${colorClass.gradient} border-transparent shadow-lg shadow-blue-500/50 animate-glow-pulse`
                       : 'bg-slate-800/50 border-slate-700 hover:border-slate-600 hover:bg-slate-700/50'
                   }`}
                   style={{ animationDelay: `${idx * 100}ms` }}
@@ -322,9 +345,16 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Decorative divider with gradient */}
+        <div className="my-16 flex items-center justify-center gap-4">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+          <div className="text-cyan-400/50 text-sm font-semibold tracking-widest">✨ YOUR STORIES ✨</div>
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+        </div>
+
         {/* Stats Showcase */}
         {stories.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16" id="stats-section" data-scroll-animate>
             {[
               { icon: '📚', value: stories.length, label: 'Stories Created', color: 'cyan' },
               { icon: '⭐', value: ratingStats.average, label: 'Average Rating', color: 'amber' },
@@ -350,7 +380,7 @@ export default function Home() {
 
         {/* Story Display */}
         {story && (
-          <div className="animate-slide-up relative group/story">
+          <div className="animate-slide-up relative group/story" id="story-section" data-scroll-animate>
             {/* Decorative wrapper orbs */}
             <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-0 group-hover/story:opacity-30 transition-opacity duration-500 pointer-events-none"></div>
             <div className="absolute -bottom-20 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-400 to-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-0 group-hover/story:opacity-25 transition-opacity duration-500 pointer-events-none"></div>
@@ -570,6 +600,26 @@ export default function Home() {
           10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
           20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
+        @keyframes glow-pulse {
+          0%, 100% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.3); }
+          50% { box-shadow: 0 0 40px rgba(6, 182, 212, 0.6); }
+        }
+        @keyframes slide-in-left {
+          from { opacity: 0; transform: translateX(-40px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slide-in-right {
+          from { opacity: 0; transform: translateX(40px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes rotate-in {
+          from { opacity: 0; transform: rotate(-10deg) scale(0.9); }
+          to { opacity: 1; transform: rotate(0deg) scale(1); }
+        }
+        @keyframes flip-in-x {
+          from { opacity: 0; transform: rotateX(90deg); }
+          to { opacity: 1; transform: rotateX(0deg); }
+        }
         .animate-blob {
           animation: blob 7s infinite;
         }
@@ -617,6 +667,32 @@ export default function Home() {
         }
         .animate-shake {
           animation: shake 0.5s ease-in-out;
+        }
+        .animate-glow-pulse {
+          animation: glow-pulse 3s ease-in-out infinite;
+        }
+        .animate-slide-in-left {
+          animation: slide-in-left 0.6s ease-out;
+        }
+        .animate-slide-in-right {
+          animation: slide-in-right 0.6s ease-out;
+        }
+        .animate-rotate-in {
+          animation: rotate-in 0.6s ease-out;
+        }
+        .animate-flip-in-x {
+          animation: flip-in-x 0.8s ease-out;
+          perspective: 1000px;
+        }
+        /* Scroll animation state */
+        [data-scroll-animate] {
+          opacity: 0;
+          transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+          transform: translateY(20px);
+        }
+        [data-scroll-animate].visible {
+          opacity: 1;
+          transform: translateY(0);
         }
       `}</style>
     </main>
