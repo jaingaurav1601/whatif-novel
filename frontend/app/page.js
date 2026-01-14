@@ -215,32 +215,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Stats Showcase */}
-        {stories.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-            {[
-              { icon: '📚', value: stories.length, label: 'Stories Created', color: 'cyan' },
-              { icon: '⭐', value: ratingStats.average, label: 'Average Rating', color: 'amber' },
-              { icon: '📝', value: stories.reduce((sum, s) => sum + s.word_count, 0).toLocaleString(), label: 'Total Words Written', color: 'purple' }
-            ].map((stat, idx) => (
-              <div 
-                key={stat.label}
-                className={`bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 text-center group hover:border-${stat.color}-500/50 transition transform hover:scale-105 hover:shadow-lg hover:shadow-${stat.color}-500/20 animate-scale-in`}
-                style={{ animationDelay: `${idx * 150}ms` }}
-              >
-                {/* Animated gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-10 rounded-2xl animate-shimmer"></div>
-                
-                <div className="relative z-10">
-                  <div className="text-4xl mb-3 group-hover:animate-bounce">{stat.icon}</div>
-                  <div className={`text-3xl font-black text-${stat.color}-400`}>{stat.value}</div>
-                  <div className="text-slate-400 text-sm">{stat.label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12" id="universe-section">
           
@@ -347,6 +321,32 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Stats Showcase */}
+        {stories.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            {[
+              { icon: '📚', value: stories.length, label: 'Stories Created', color: 'cyan' },
+              { icon: '⭐', value: ratingStats.average, label: 'Average Rating', color: 'amber' },
+              { icon: '📝', value: stories.reduce((sum, s) => sum + s.word_count, 0).toLocaleString(), label: 'Total Words Written', color: 'purple' }
+            ].map((stat, idx) => (
+              <div 
+                key={stat.label}
+                className={`bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 text-center group hover:border-${stat.color}-500/50 transition transform hover:scale-105 hover:shadow-lg hover:shadow-${stat.color}-500/20 animate-scale-in`}
+                style={{ animationDelay: `${idx * 150}ms` }}
+              >
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-10 rounded-2xl animate-shimmer"></div>
+                
+                <div className="relative z-10">
+                  <div className="text-4xl mb-3 group-hover:animate-bounce">{stat.icon}</div>
+                  <div className={`text-3xl font-black text-${stat.color}-400`}>{stat.value}</div>
+                  <div className="text-slate-400 text-sm">{stat.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Story Display */}
         {story && (
