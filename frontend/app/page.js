@@ -67,6 +67,19 @@ export default function Home() {
     });
   }, []);
 
+  // Separate effect for story fetching to prevent interfering with generated stories
+  useEffect(() => {
+    const timer = setInterval(() => {
+      getStoryHistory(1000).then(data => {
+        setStories(data.stories || []);
+      }).catch(() => {
+        setStories([]);
+      });
+    }, 30000); // Refresh every 30 seconds
+    
+    return () => clearInterval(timer);
+  }, []);
+
   const handleGenerate = async (e) => {
     e.preventDefault();
     
@@ -388,7 +401,7 @@ export default function Home() {
 
         {/* Story Display */}
         {story && (
-          <div className="animate-slide-up relative group/story" id="story-section" data-scroll-animate>
+          <div className="animate-slide-up relative group/story" id="story-section">
             {/* Decorative wrapper orbs */}
             <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-0 group-hover/story:opacity-30 transition-opacity duration-500 pointer-events-none"></div>
             <div className="absolute -bottom-20 -left-40 w-80 h-80 bg-gradient-to-tr from-purple-400 to-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-0 group-hover/story:opacity-25 transition-opacity duration-500 pointer-events-none"></div>
