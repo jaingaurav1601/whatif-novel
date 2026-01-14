@@ -60,55 +60,55 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
       <div className="container mx-auto px-4 py-12">
         
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-6xl font-bold text-white mb-4">
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
             What If Novel AI
           </h1>
-          <p className="text-xl text-purple-200">
+          <p className="text-xl text-slate-300">
             Explore alternative storylines in your favorite universes
           </p>
         </div>
 
         {/* Generator Form */}
-        <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl mb-8">
+        <div className="max-w-3xl mx-auto bg-gradient-to-br from-slate-800/80 to-slate-700/80 backdrop-blur-lg rounded-2xl p-8 shadow-2xl mb-8 border border-slate-600/30">
           <form onSubmit={handleGenerate} className="space-y-6">
             
             {/* Universe Selector */}
             <div>
-              <label className="block text-white font-semibold mb-2">
+              <label className="block text-slate-200 font-semibold mb-2">
                 Choose Universe
               </label>
               <select
                 value={selectedUniverse}
                 onChange={(e) => setSelectedUniverse(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:border-purple-400 focus:outline-none"
+                className="w-full px-4 py-3 rounded-lg bg-slate-700/50 text-white border border-slate-500/50 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/30"
               >
                 {universes.map(u => (
-                  <option key={u} value={u} className="bg-gray-900">{u}</option>
+                  <option key={u} value={u} className="bg-slate-900">{u}</option>
                 ))}
               </select>
             </div>
 
             {/* What If Input */}
             <div>
-              <label className="block text-white font-semibold mb-2">
+              <label className="block text-slate-200 font-semibold mb-2">
                 What If...
               </label>
               <textarea
                 value={whatIf}
                 onChange={(e) => setWhatIf(e.target.value)}
                 placeholder="e.g., Harry was sorted into Slytherin"
-                className="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-white/50 border border-white/30 focus:border-purple-400 focus:outline-none min-h-[100px]"
+                className="w-full px-4 py-3 rounded-lg bg-slate-700/50 text-white placeholder-slate-400 border border-slate-500/50 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400/30 min-h-[100px]"
               />
             </div>
 
             {/* Length Selector */}
             <div>
-              <label className="block text-white font-semibold mb-2">
+              <label className="block text-slate-200 font-semibold mb-2">
                 Story Length
               </label>
               <div className="flex gap-4">
@@ -119,8 +119,8 @@ export default function Home() {
                     onClick={() => setLength(l)}
                     className={`px-6 py-2 rounded-lg font-semibold transition ${
                       length === l
-                        ? 'bg-purple-500 text-white'
-                        : 'bg-white/20 text-white hover:bg-white/30'
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
+                        : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/30'
                     }`}
                   >
                     {l.charAt(0).toUpperCase() + l.slice(1)}
@@ -133,7 +133,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 rounded-lg hover:from-purple-600 hover:to-pink-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold py-4 rounded-lg hover:from-cyan-600 hover:via-blue-600 hover:to-purple-600 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/20"
             >
               {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -147,7 +147,7 @@ export default function Home() {
             </button>
 
             {error && (
-              <div className="bg-red-500/20 border border-red-500 text-white px-4 py-3 rounded-lg">
+              <div className="bg-red-500/10 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg">
                 {error}
               </div>
             )}
@@ -156,18 +156,18 @@ export default function Home() {
 
         {/* Story Display */}
         {story && (
-          <div className="max-w-4xl mx-auto bg-white rounded-2xl p-8 shadow-2xl">
+          <div className="max-w-4xl mx-auto bg-gradient-to-br from-white to-slate-50 rounded-2xl p-8 shadow-2xl">
             <div className="mb-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <span className="inline-block bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-semibold mb-2">
+                  <span className="inline-block bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold mb-2">
                     {story.universe}
                   </span>
-                  <h2 className="text-2xl font-bold text-gray-800">
+                  <h2 className="text-2xl font-bold text-slate-900">
                     What if {story.what_if}?
                   </h2>
                 </div>
-                <div className="text-right text-sm text-gray-500">
+                <div className="text-right text-sm text-slate-500">
                   {story.word_count} words
                 </div>
               </div>
@@ -175,16 +175,16 @@ export default function Home() {
             
             <div className="prose prose-lg max-w-none">
               {story.story.split('\n').map((paragraph, i) => (
-                <p key={i} className="mb-4 text-gray-700 leading-relaxed">
+                <p key={i} className="mb-4 text-slate-700 leading-relaxed">
                   {paragraph}
                 </p>
               ))}
             </div>
 
-            <div className="mt-8 pt-6 border-t border-gray-200 flex justify-between items-center">
+            <div className="mt-8 pt-6 border-t border-slate-200 flex justify-between items-center">
               <Link 
                 href="/history"
-                className="text-purple-600 hover:text-purple-800 font-semibold"
+                className="text-cyan-600 hover:text-cyan-700 font-semibold transition"
               >
                 ← See all stories
               </Link>
