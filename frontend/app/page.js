@@ -31,6 +31,10 @@ const universeColors = {
 export default function Home() {
   const [universes, setUniverses] = useState([]);
   const [selectedUniverse, setSelectedUniverse] = useState('');
+  const [isCustomUniverse, setIsCustomUniverse] = useState(false);
+  const [customUniverseName, setCustomUniverseName] = useState('');
+  const [customSystemPrompt, setCustomSystemPrompt] = useState('');
+  const [promptLoading, setPromptLoading] = useState(false);
   const [whatIf, setWhatIf] = useState('');
   const [length, setLength] = useState('medium');
   const [loading, setLoading] = useState(false);
@@ -63,6 +67,19 @@ export default function Home() {
     }).catch(() => { });
   }, []);
 
+  const handleGenerateSystemPrompt = async () => {
+    if (!customUniverseName.trim()) return;
+    setPromptLoading(true);
+    try {
+      const result = await generateSystemPrompt(customUniverseName);
+      setCustomSystemPrompt(result.system_prompt);
+    } catch (err) {
+      console.error('Failed to generate prompt', err);
+    } finally {
+      setPromptLoading(false);
+    }
+  };
+
   const handleGenerateStory = async (e) => {
     e.preventDefault();
 
@@ -71,12 +88,33 @@ export default function Home() {
       return;
     }
 
+    if (isCustomUniverse && !customUniverseName.trim()) {
+      setError('Please enter a universe name');
+      return;
+    }
+
     setLoading(true);
     setError('');
     setStory(null);
 
     try {
-      const result = await generateStory(selectedUniverse, whatIf, length);
+      let result;
+      if (isCustomUniverse) {
+        // If no prompt manually entered, try to generate one first or let backend handle it
+        let promptToUse = customSystemPrompt;
+        if (!promptToUse && customUniverseName) {
+          // Optional: auto-generate if empty. For now trust backend or user.
+          // Actually backend generate_custom_story might need prompt. 
+          // Let's ensure we have a prompt if the user didn't generate one.
+          const promptRes = await generateSystemPrompt(customUniverseName);
+          promptToUse = promptRes.system_prompt;
+          setCustomSystemPrompt(promptToUse);
+        }
+        result = await generateCustomStory(customUniverseName, promptToUse, whatIf, length);
+      } else {
+        result = await generateStory(selectedUniverse, whatIf, length);
+      }
+
       setStory(result);
 
       setTimeout(() => {
@@ -202,33 +240,90 @@ export default function Home() {
               {universes.map((u, idx) => (
                 <button
                   key={u}
-                  onClick={() => setSelectedUniverse(u)}
-                  className={`w-full p-4 rounded-xl text-left transition-all border-2 group relative overflow-hidden animate-fade-in ${selectedUniverse === u
+                  onClick={() => {
+                    setSelectedUniverse(u);
+                    setIsCustomUniverse(false);
+                  }}
+                  className={`w-full p-4 rounded-xl text-left transition-all border-2 group relative overflow-hidden animate-fade-in ${!isCustomUniverse && selectedUniverse === u
                     ? `bg-gradient-to-r ${universeColors[u]} text-white border-transparent shadow-lg scale-105`
                     : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-600 hover:scale-102'
                     }`}
                   style={{ animationDelay: `${idx * 50}ms` }}
                 >
-                  {selectedUniverse !== u && (
+                  {!isCustomUniverse && selectedUniverse === u ? null : (
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-100 dark:via-purple-900 to-transparent opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer"></div>
                   )}
                   <div className="relative flex items-center gap-3">
                     <span className="text-3xl group-hover:scale-110 transition-transform">{universeEmojis[u] || '🌌'}</span>
-                    <span className={`font-bold text-lg ${selectedUniverse === u ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                    <span className={`font-bold text-lg ${!isCustomUniverse && selectedUniverse === u ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
                       {u}
                     </span>
                   </div>
                 </button>
               ))}
+
+              {/* Custom Universe Button */}
+              <button
+                onClick={() => setIsCustomUniverse(true)}
+                className={`w-full p-4 rounded-xl text-left transition-all border-2 group relative overflow-hidden animate-fade-in ${isCustomUniverse
+                  ? 'bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white border-transparent shadow-lg scale-105'
+                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-600 hover:scale-102'
+                  }`}
+              >
+                <div className="relative flex items-center gap-3">
+                  <span className="text-3xl group-hover:scale-110 transition-transform">✨</span>
+                  <span className={`font-bold text-lg ${isCustomUniverse ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                    Custom Universe
+                  </span>
+                </div>
+              </button>
             </div>
           </div>
 
           {/* Generator Form */}
           <div className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '200ms' }}>
             <div className="relative group">
-              <div className={`absolute inset-0 bg-gradient-to-r ${selectedColor} rounded-2xl blur opacity-20 group-hover:opacity-30 transition`}></div>
+              <div className={`absolute inset-0 bg-gradient-to-r ${isCustomUniverse ? 'from-pink-500 via-purple-500 to-indigo-500' : selectedColor} rounded-2xl blur opacity-20 group-hover:opacity-30 transition`}></div>
               <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
                 <form onSubmit={handleGenerateStory} className="space-y-6">
+
+                  {isCustomUniverse && (
+                    <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 animate-slide-in">
+                      <div>
+                        <label className="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                          Universe Name
+                        </label>
+                        <input
+                          type="text"
+                          value={customUniverseName}
+                          onChange={(e) => setCustomUniverseName(e.target.value)}
+                          placeholder="e.g. Cyberpunk 2077, Dune, My Original World"
+                          className="w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="block text-sm font-bold text-gray-900 dark:text-white">
+                            System Prompt (Optional)
+                          </label>
+                          <button
+                            type="button"
+                            onClick={handleGenerateSystemPrompt}
+                            disabled={!customUniverseName || promptLoading}
+                            className="text-xs px-3 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 rounded-full hover:bg-purple-200 dark:hover:bg-purple-800 transition disabled:opacity-50"
+                          >
+                            {promptLoading ? 'Generating...' : '✨ Auto-Generate'}
+                          </button>
+                        </div>
+                        <textarea
+                          value={customSystemPrompt}
+                          onChange={(e) => setCustomSystemPrompt(e.target.value)}
+                          placeholder="Describe the world, rules, and tone..."
+                          className="w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none min-h-[100px] text-sm"
+                        />
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                       <span className="text-2xl">💭</span>

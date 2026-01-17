@@ -32,7 +32,7 @@ export default function HistoryPage() {
   const fetchStories = async () => {
     setLoading(true);
     try {
-      const data = await getStoryHistory(100);
+      const data = await getStoryHistory(1000);
       setStories(data.stories || []);
     } catch (err) {
       console.error('Failed to load stories');
