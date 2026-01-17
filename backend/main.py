@@ -1,7 +1,8 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text, inspect
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
@@ -9,13 +10,28 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-from database import get_db, Story, Rating
+from database import get_db, Story, Rating, engine
 from story_generator import generate_story, get_available_universes
+import migrate_db
 
 env_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
-app = FastAPI(title="What If Novel AI", version="2.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Run database migration on startup
+    try:
+        print("🚀 Starting database migration...")
+        migrate_db.migrate()
+        print("✅ Database migration completed successfully")
+    except Exception as e:
+        print(f"❌ Database migration failed: {e}")
+        # We don't exit here so the app can try to start, 
+        # but in production you might want to fail hard.
+        # Given the user's issue, let's log loudly.
+    yield
+
+app = FastAPI(title="What If Novel AI", version="2.0.0", lifespan=lifespan)
 
 # CORS for frontend
 app.add_middleware(
@@ -55,6 +71,20 @@ class RatingStats(BaseModel):
     distribution: dict  # {1: count, 2: count, ...}
 
 # Endpoints
+@app.get("/debug/schema")
+def debug_schema():
+    """Debug endpoint to show database columns"""
+    try:
+        inspector = inspect(engine)
+        columns = [col['name'] for col in inspector.get_columns('stories')]
+        return {
+            "table": "stories",
+            "columns": columns,
+            "database_url_masked": str(engine.url).replace(engine.url.password, "***") if engine.url.password else str(engine.url)
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.get("/")
 def root():
     return {

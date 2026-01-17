@@ -10,9 +10,8 @@ import sys
 def migrate():
     print(f"Migrating database using engine: {engine.url}")
     
-    try:
-        with engine.connect() as conn:
-            # Create inspector to check for columns
+    with engine.connect() as conn:
+        # Create inspector to check for columns
             inspector = inspect(engine)
             columns = [col['name'] for col in inspector.get_columns('stories')]
             print(f"Found columns in 'stories': {columns}")
@@ -79,9 +78,9 @@ def migrate():
             print(f"📚 Total stories preserved: {count}")
             print("\n✅ Migration completed successfully!")
             
+if __name__ == "__main__":
+    try:
+        migrate()
     except Exception as e:
         print(f"❌ Migration failed: {e}")
         sys.exit(1)
-        
-if __name__ == "__main__":
-    migrate()

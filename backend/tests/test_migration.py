@@ -75,13 +75,13 @@ def test_migration_backfills_data(test_engine):
         assert len(token) > 0
 
 def test_migration_failure_exits(test_engine):
-    """Test that migration calls sys.exit(1) on failure"""
+    """Test that migration raises Exception on failure"""
     # Mock engine.connect to raise exception
     mock_engine = MagicMock()
     mock_engine.connect.side_effect = Exception("DB Error")
     mock_engine.url = "sqlite:///test"
 
     with patch('migrate_db.engine', mock_engine):
-        with pytest.raises(SystemExit) as excinfo:
+        with pytest.raises(Exception) as excinfo:
             migrate_db.migrate()
-        assert excinfo.value.code == 1
+        assert "DB Error" in str(excinfo.value)
