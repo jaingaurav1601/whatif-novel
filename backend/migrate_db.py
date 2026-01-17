@@ -13,6 +13,7 @@ def migrate():
             # Create inspector to check for columns
             inspector = inspect(engine)
             columns = [col['name'] for col in inspector.get_columns('stories')]
+            print(f"Found columns in 'stories': {columns}")
             
             if 'share_token' not in columns:
                 print("Adding share_token column...")
@@ -60,8 +61,8 @@ def migrate():
             
     except Exception as e:
         print(f"❌ Migration failed: {e}")
-        # In SQLAlchemy 2.0+, rollback is often automatic on context exit with error, 
-        # but manual verification is good.
+        import sys
+        sys.exit(1)
         
 if __name__ == "__main__":
     migrate()
