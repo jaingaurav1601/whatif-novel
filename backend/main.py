@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
@@ -8,18 +9,18 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-from database import get_db, Story
+from database import get_db, Story, Rating
 from story_generator import generate_story, get_available_universes
 
 env_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
-app = FastAPI(title="What If Novel AI", version="1.0.0")
+app = FastAPI(title="What If Novel AI", version="2.0.0")
 
 # CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Will restrict in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,8 +30,12 @@ app.add_middleware(
 class StoryRequest(BaseModel):
     universe: str
     what_if: str
-    length: str = "medium"  # short, medium, long
-    system_prompt: Optional[str] = None  # For custom universes
+    length: str = "medium"
+    system_prompt: Optional[str] = None
+
+class RatingRequest(BaseModel):
+    rating: int
+    session_id: str
 
 class StoryResponse(BaseModel):
     id: int
@@ -38,20 +43,29 @@ class StoryResponse(BaseModel):
     what_if: str
     story: str
     word_count: int
-    rating: int
+    rating: int  # Kept for backward compatibility
+    average_rating: float
+    rating_count: int
     created_at: str
+    share_url: Optional[str] = None
+
+class RatingStats(BaseModel):
+    average: float
+    count: int
+    distribution: dict  # {1: count, 2: count, ...}
 
 # Endpoints
 @app.get("/")
 def root():
     return {
         "message": "What If Novel AI API",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "endpoints": {
             "universes": "/universes",
             "generate": "/story/generate",
             "history": "/story/history",
-            "trending": "/story/trending"
+            "trending": "/story/trending",
+            "share": "/story/share/{token}"
         }
     }
 
@@ -68,14 +82,12 @@ def create_story(request: StoryRequest, db: Session = Depends(get_db)):
     """Generate a new 'what if' story"""
     
     try:
-        # Generate the story
         result = generate_story(
             universe=request.universe,
             what_if=request.what_if,
             length=request.length
         )
         
-        # Save to database
         db_story = Story(
             universe=request.universe,
             what_if=request.what_if,
@@ -93,6 +105,8 @@ def create_story(request: StoryRequest, db: Session = Depends(get_db)):
             story=db_story.story,
             word_count=db_story.word_count,
             rating=db_story.rating,
+            average_rating=db_story.average_rating,
+            rating_count=db_story.rating_count,
             created_at=db_story.created_at.isoformat()
         )
         
@@ -115,6 +129,8 @@ def get_history(limit: int = 20, db: Session = Depends(get_db)):
                 "what_if": s.what_if,
                 "word_count": s.word_count,
                 "rating": s.rating,
+                "average_rating": s.average_rating,
+                "rating_count": s.rating_count,
                 "created_at": s.created_at.isoformat()
             }
             for s in stories
@@ -124,7 +140,14 @@ def get_history(limit: int = 20, db: Session = Depends(get_db)):
 @app.get("/story/trending")
 def trending_stories(db: Session = Depends(get_db)):
     """Get top rated stories"""
-    stories = db.query(Story).filter(Story.is_public == True).order_by(Story.rating.desc()).limit(10).all()
+    stories = db.query(Story).filter(Story.is_public == True).all()
+    
+    # Sort by average rating and rating count
+    sorted_stories = sorted(
+        stories,
+        key=lambda s: (s.average_rating, s.rating_count),
+        reverse=True
+    )[:10]
     
     return {
         "stories": [
@@ -132,14 +155,15 @@ def trending_stories(db: Session = Depends(get_db)):
                 "id": s.id,
                 "universe": s.universe,
                 "what_if": s.what_if,
-                "rating": s.rating,
+                "average_rating": s.average_rating,
+                "rating_count": s.rating_count,
                 "word_count": s.word_count
             }
-            for s in stories
+            for s in sorted_stories
         ]
     }
 
-@app.get("/story/{story_id}")
+@app.get("/story/{story_id}", response_model=StoryResponse)
 def get_story(story_id: int, db: Session = Depends(get_db)):
     """Get a specific story"""
     story = db.query(Story).filter(Story.id == story_id).first()
@@ -154,23 +178,103 @@ def get_story(story_id: int, db: Session = Depends(get_db)):
         story=story.story,
         word_count=story.word_count,
         rating=story.rating,
-        created_at=story.created_at.isoformat()
+        average_rating=story.average_rating,
+        rating_count=story.rating_count,
+        created_at=story.created_at.isoformat(),
+        share_url=f"/share/{story.share_token}" if story.share_token else None
     )
 
 @app.post("/story/{story_id}/rate")
-def rate_story(story_id: int, rating: int, db: Session = Depends(get_db)):
-    """Rate a story (1-5)"""
-    if rating < 1 or rating > 5:
+def rate_story(story_id: int, request: RatingRequest, db: Session = Depends(get_db)):
+    """Rate a story (1-5 stars) with session tracking"""
+    if request.rating < 1 or request.rating > 5:
         raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
     
     story = db.query(Story).filter(Story.id == story_id).first()
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
     
-    story.rating = rating
+    # Check if this session already rated this story
+    existing_rating = db.query(Rating).filter(
+        Rating.story_id == story_id,
+        Rating.session_id == request.session_id
+    ).first()
+    
+    if existing_rating:
+        # Update existing rating
+        existing_rating.rating_value = request.rating
+        existing_rating.updated_at = datetime.utcnow()
+    else:
+        # Create new rating
+        new_rating = Rating(
+            story_id=story_id,
+            session_id=request.session_id,
+            rating_value=request.rating
+        )
+        db.add(new_rating)
+    
+    db.commit()
+    db.refresh(story)
+    
+    return {
+        "message": "Rating saved",
+        "average_rating": story.average_rating,
+        "rating_count": story.rating_count
+    }
+
+@app.get("/story/{story_id}/ratings", response_model=RatingStats)
+def get_story_ratings(story_id: int, db: Session = Depends(get_db)):
+    """Get rating statistics for a story"""
+    story = db.query(Story).filter(Story.id == story_id).first()
+    if not story:
+        raise HTTPException(status_code=404, detail="Story not found")
+    
+    # Calculate distribution
+    distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    for rating in story.ratings:
+        distribution[rating.rating_value] += 1
+    
+    return RatingStats(
+        average=story.average_rating,
+        count=story.rating_count,
+        distribution=distribution
+    )
+
+@app.post("/story/{story_id}/share")
+def generate_share_link(story_id: int, db: Session = Depends(get_db)):
+    """Generate a shareable link for a story"""
+    story = db.query(Story).filter(Story.id == story_id).first()
+    if not story:
+        raise HTTPException(status_code=404, detail="Story not found")
+    
+    token = story.generate_share_token()
     db.commit()
     
-    return {"message": "Rating updated", "new_rating": rating}
+    return {
+        "share_token": token,
+        "share_url": f"/share/{token}"
+    }
+
+@app.get("/story/share/{token}", response_model=StoryResponse)
+def get_shared_story(token: str, db: Session = Depends(get_db)):
+    """Get a story by its share token (public access)"""
+    story = db.query(Story).filter(Story.share_token == token).first()
+    
+    if not story:
+        raise HTTPException(status_code=404, detail="Story not found")
+    
+    return StoryResponse(
+        id=story.id,
+        universe=story.universe,
+        what_if=story.what_if,
+        story=story.story,
+        word_count=story.word_count,
+        rating=story.rating,
+        average_rating=story.average_rating,
+        rating_count=story.rating_count,
+        created_at=story.created_at.isoformat(),
+        share_url=f"/share/{token}"
+    )
 
 class UniversePromptRequest(BaseModel):
     universe: str
@@ -198,7 +302,6 @@ def generate_custom_story(request: StoryRequest, db: Session = Depends(get_db)):
             length=request.length
         )
         
-        # Save story to database
         story = Story(
             universe=request.universe,
             what_if=request.what_if,
@@ -218,6 +321,8 @@ def generate_custom_story(request: StoryRequest, db: Session = Depends(get_db)):
             story=story.story,
             word_count=story.word_count,
             rating=story.rating,
+            average_rating=story.average_rating,
+            rating_count=story.rating_count,
             created_at=story.created_at.isoformat()
         )
     except Exception as e:
