@@ -36,3 +36,25 @@ export async function rateStory(id, rating) {
   if (!res.ok) throw new Error('Failed to rate story');
   return res.json();
 }
+
+export async function generateSystemPrompt(universeName) {
+  const res = await fetch(`${API_BASE}/universe/system-prompt`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ universe: universeName })
+  });
+  
+  if (!res.ok) throw new Error('Failed to generate system prompt');
+  return res.json();
+}
+
+export async function generateCustomStory(universeName, systemPrompt, whatIf, length = 'medium') {
+  const res = await fetch(`${API_BASE}/story/generate-custom`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ universe: universeName, system_prompt: systemPrompt, what_if: whatIf, length })
+  });
+  
+  if (!res.ok) throw new Error('Failed to generate story');
+  return res.json();
+}

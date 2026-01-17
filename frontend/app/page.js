@@ -37,6 +37,11 @@ export default function Home() {
   const [ratingLoading, setRatingLoading] = useState(false);
   const [stories, setStories] = useState([]);
   const [visibleSections, setVisibleSections] = useState({});
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [customUniverseName, setCustomUniverseName] = useState('');
+  const [customSystemPrompt, setCustomSystemPrompt] = useState('');
+  const [promptGenerating, setPromptGenerating] = useState(false);
+  const [customGradient, setCustomGradient] = useState('from-purple-600 via-pink-600 to-blue-600');
 
   // Intersection Observer for scroll animations
   useEffect(() => {
@@ -88,7 +93,55 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleGenerate = async (e) => {
+  const handleGenerateSystemPrompt = async () => {
+    if (!customUniverseName.trim()) {
+      setError('Please enter a universe name');
+      return;
+    }
+
+    setPromptGenerating(true);
+    setError('');
+
+    try {
+      const { generateSystemPrompt } = await import('@/lib/api');
+      const result = await generateSystemPrompt(customUniverseName);
+      setCustomSystemPrompt(result.system_prompt);
+    } catch (err) {
+      setError('Failed to generate system prompt. Please try again.');
+    } finally {
+      setPromptGenerating(false);
+    }
+  };
+
+  const handleCreateCustomUniverse = async () => {
+    if (!customUniverseName.trim()) {
+      setError('Please enter a universe name');
+      return;
+    }
+
+    if (!customSystemPrompt.trim()) {
+      setError('Please generate a system prompt first');
+      return;
+    }
+
+    // Add custom universe to the list
+    const updatedUniverses = [...universes, customUniverseName];
+    setUniverses(updatedUniverses);
+    setSelectedUniverse(customUniverseName);
+    
+    // Store custom universe config in sessionStorage for this session
+    sessionStorage.setItem(`custom_${customUniverseName}`, JSON.stringify({
+      systemPrompt: customSystemPrompt,
+      gradient: customGradient
+    }));
+
+    setShowCustomModal(false);
+    setCustomUniverseName('');
+    setCustomSystemPrompt('');
+    setError('');
+  };
+
+  const handleGenerateStory = async (e) => {
     e.preventDefault();
     
     if (!whatIf.trim()) {
@@ -101,7 +154,18 @@ export default function Home() {
     setStory(null);
 
     try {
-      const result = await generateStory(selectedUniverse, whatIf, length);
+      let result;
+      const isCustom = !['Harry Potter', 'Lord of the Rings', 'Marvel MCU', 'Star Wars', 'One Piece', 'Naruto', 'Attack on Titan', 'DC'].includes(selectedUniverse);
+      
+      if (isCustom) {
+        const customConfig = JSON.parse(sessionStorage.getItem(`custom_${selectedUniverse}`));
+        const { generateCustomStory } = await import('@/lib/api');
+        result = await generateCustomStory(selectedUniverse, customConfig.systemPrompt, whatIf, length);
+      } else {
+        const { generateStory } = await import('@/lib/api');
+        result = await generateStory(selectedUniverse, whatIf, length);
+      }
+      
       setStory(result);
       
       // Scroll to story display after it's generated
@@ -289,18 +353,30 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 animate-shimmer"></div>
                   
                   <div className="relative z-10 flex items-center gap-3">
-                    <div className="text-3xl group-hover:animate-bounce">{universeEmojis[u]}</div>
+                    <div className="text-3xl group-hover:animate-bounce">{universeEmojis[u] || '🌌'}</div>
                     <div className="font-bold text-lg text-left">{u}</div>
                   </div>
                 </button>
               ))}
+
+              {/* Custom Universe Button */}
+              <button
+                onClick={() => setShowCustomModal(true)}
+                className="w-full p-4 rounded-xl transition transform hover:scale-105 duration-300 border-2 border-dashed border-purple-500/50 hover:border-purple-400 bg-slate-800/30 hover:bg-slate-700/50 text-purple-300 hover:text-purple-200 font-bold animate-scale-in"
+                style={{ animationDelay: `${universes.length * 100}ms` }}
+              >
+                <div className="relative z-10 flex items-center justify-center gap-3">
+                  <div className="text-3xl">✨</div>
+                  <div className="font-bold text-lg">Create Custom Universe</div>
+                </div>
+              </button>
             </div>
           </div>
 
           {/* Generator Form */}
           <div className="lg:col-span-2">
             <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl group hover:shadow-cyan-500/20 transition-shadow duration-300">
-              <form onSubmit={handleGenerate} className="space-y-6">
+              <form onSubmit={handleGenerateStory} className="space-y-6">
                 
                 {/* What If Input */}
                 <div className="group/input">
@@ -548,6 +624,92 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Custom Universe Modal */}
+        {showCustomModal && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl max-w-md w-full border border-slate-700/50 animate-scale-in">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white p-6 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">✨</span>
+                  <h3 className="text-2xl font-bold">Create Universe</h3>
+                </div>
+                <button
+                  onClick={() => setShowCustomModal(false)}
+                  className="text-2xl hover:rotate-90 transition duration-300"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6 space-y-4">
+                {/* Universe Name Input */}
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-2">Universe Name</label>
+                  <input
+                    type="text"
+                    value={customUniverseName}
+                    onChange={(e) => setCustomUniverseName(e.target.value)}
+                    placeholder="e.g., Cyberpunk Tokyo, Medieval Wales, Underwater City..."
+                    className="w-full px-4 py-3 rounded-lg bg-slate-700/50 border-2 border-slate-600 text-white placeholder-slate-400 focus:border-purple-500 focus:outline-none transition"
+                  />
+                </div>
+
+                {/* Generate System Prompt Button */}
+                <button
+                  onClick={handleGenerateSystemPrompt}
+                  disabled={promptGenerating || !customUniverseName.trim()}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-lg hover:from-purple-600 hover:to-pink-600 transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2"
+                >
+                  {promptGenerating ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Generating...
+                    </>
+                  ) : (
+                    '🎨 Generate System Prompt'
+                  )}
+                </button>
+
+                {/* System Prompt Display */}
+                {customSystemPrompt && (
+                  <div className="bg-slate-700/30 border-2 border-slate-600 rounded-lg p-4 max-h-40 overflow-y-auto">
+                    <p className="text-slate-300 text-sm leading-relaxed">{customSystemPrompt}</p>
+                  </div>
+                )}
+
+                {/* Error Message */}
+                {error && (
+                  <div className="bg-red-500/20 border-2 border-red-500/50 text-red-300 px-4 py-3 rounded-lg text-sm">
+                    {error}
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="bg-slate-700/50 p-6 flex gap-3 border-t border-slate-700/50">
+                <button
+                  onClick={() => setShowCustomModal(false)}
+                  className="flex-1 px-4 py-3 bg-slate-600 hover:bg-slate-500 text-white font-bold rounded-lg transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateCustomUniverse}
+                  disabled={!customSystemPrompt}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold rounded-lg transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+                >
+                  ✨ Create Universe
+                </button>
               </div>
             </div>
           </div>

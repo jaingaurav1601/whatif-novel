@@ -112,3 +112,65 @@ Begin the story now:"""
 def get_available_universes():
     """Return list of supported universes"""
     return list(UNIVERSES.keys())
+
+def generate_universe_prompt(universe_name: str) -> str:
+    """Generate a system prompt for a custom universe"""
+    prompt = f"""Create a detailed system prompt for an AI writer to generate stories in the "{universe_name}" universe.
+
+The system prompt should:
+1. Establish the AI as an expert in the {universe_name} universe
+2. List key characters and elements from {universe_name}
+3. Describe the tone, style, and atmosphere of {universe_name}
+4. Include specific details about the world, rules, and lore
+5. Guide the AI to write authentic stories that fit the universe
+
+Format the response as a complete system prompt that can be used directly with an AI model. Start with "You are an expert in the {universe_name} universe..." and make it comprehensive but concise (150-200 words)."""
+    
+    client = _get_client()
+    
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content": "You are an expert at creating detailed system prompts for creative AI writers."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=500,
+        temperature=0.7
+    )
+    
+    return response.choices[0].message.content
+
+def generate_story_with_prompt(universe: str, system_prompt: str, what_if: str, length: str = "medium") -> str:
+    """Generate a story using a custom system prompt"""
+    length_specs = {
+        "short": "500-800 words, focus on one key scene",
+        "medium": "1000-1500 words, include 2-3 key scenes with character development",
+        "long": "1800-2500 words, full narrative arc with multiple scenes and deeper exploration"
+    }
+    
+    prompt = f"""Write a {length} alternative story exploring this 'What If' scenario:
+
+**What If: {what_if}**
+
+Guidelines:
+- Length: {length_specs.get(length, length_specs['medium'])}
+- Stay true to the universe's tone, rules, and character personalities
+- Make it compelling with conflict, emotion, and resolution
+- Include specific details from the {universe} universe
+- Write a complete story with beginning, middle, and end
+
+Begin the story now:"""
+    
+    client = _get_client()
+    
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=3000,
+        temperature=0.8
+    )
+    
+    return response.choices[0].message.content

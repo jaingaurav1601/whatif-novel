@@ -30,6 +30,7 @@ class StoryRequest(BaseModel):
     universe: str
     what_if: str
     length: str = "medium"  # short, medium, long
+    system_prompt: Optional[str] = None  # For custom universes
 
 class StoryResponse(BaseModel):
     id: int
@@ -170,6 +171,54 @@ def rate_story(story_id: int, rating: int, db: Session = Depends(get_db)):
     db.commit()
     
     return {"message": "Rating updated", "new_rating": rating}
+
+@app.post("/universe/system-prompt")
+def generate_system_prompt(request: StoryRequest):
+    """Generate a system prompt for a custom universe"""
+    try:
+        from story_generator import generate_universe_prompt
+        prompt = generate_universe_prompt(request.universe)
+        return {"universe": request.universe, "system_prompt": prompt}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate system prompt: {str(e)}")
+
+@app.post("/story/generate-custom")
+def generate_custom_story(request: StoryRequest, db: Session = Depends(get_db)):
+    """Generate a story for a custom universe"""
+    try:
+        from story_generator import generate_story_with_prompt
+        
+        story_text = generate_story_with_prompt(
+            universe=request.universe,
+            system_prompt=request.system_prompt,
+            what_if=request.what_if,
+            length=request.length
+        )
+        
+        # Save story to database
+        story = Story(
+            universe=request.universe,
+            what_if=request.what_if,
+            story=story_text,
+            word_count=len(story_text.split()),
+            rating=0,
+            created_at=datetime.now()
+        )
+        db.add(story)
+        db.commit()
+        db.refresh(story)
+        
+        return StoryResponse(
+            id=story.id,
+            universe=story.universe,
+            what_if=story.what_if,
+            story=story.story,
+            word_count=story.word_count,
+            rating=story.rating,
+            created_at=story.created_at.isoformat()
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate story: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
