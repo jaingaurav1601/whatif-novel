@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getUniverses, generateStory, rateStory, getStoryHistory } from '@/lib/api';
+import { getUniverses, generateStory, rateStory, getStoryHistory, generateSystemPrompt, generateCustomStory } from '@/lib/api';
 import Link from 'next/link';
 import ShareModal from '@/components/ShareModal';
 import RatingDisplay from '@/components/RatingDisplay';
