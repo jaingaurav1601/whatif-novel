@@ -34,6 +34,26 @@ UNIVERSES = {
         "context": """You are an expert in the Star Wars universe. You know all movies, characters, Force powers, and galactic lore. You write epic space opera with dramatic conflict between light and dark.""",
         "characters": ["Luke Skywalker", "Darth Vader", "Yoda", "Han Solo", "Leia", "Obi-Wan"],
         "world": "Tatooine, Coruscant, Death Star, Endor"
+    },
+    "One Piece": {
+        "context": """You are an expert in the One Piece universe by Eiichiro Oda. You know all arcs, Devil Fruits, the Grand Line, and character backstories. You write action-packed adventure with humor, emotional moments, and the spirit of camaraderie.""",
+        "characters": ["Luffy", "Zoro", "Nami", "Sanji", "Shanks", "Blackbeard"],
+        "world": "Grand Line, Pirate King's Treasure, East Blue, Wano"
+    },
+    "Naruto": {
+        "context": """You are an expert in the Naruto universe. You know the ninja world, jutsu, chakra, ninja villages, and all character developments from Naruto to Boruto. You write stories with themes of perseverance, friendship, and ninja honor.""",
+        "characters": ["Naruto Uzumaki", "Sasuke Uchiha", "Kakashi", "Gaara", "Itachi", "Madara"],
+        "world": "Hidden Leaf Village, Ninja Academy, Chakra System, Akatsuki"
+    },
+    "Attack on Titan": {
+        "context": """You are an expert in Attack on Titan (Shingeki no Kyojin). You know all seasons, Titans, the Walls, reveals about the world, and complex character motivations. You write dark, intense stories with shocking plot twists and moral dilemmas.""",
+        "characters": ["Eren Yeager", "Mikasa Ackerman", "Armin Arlert", "Levi", "Reiner", "Zeke"],
+        "world": "Wall Maria, Paradis Island, Marley, The Outside World"
+    },
+    "DC": {
+        "context": """You are an expert in the DC Universe. You know Superman, Batman, Wonder Woman, Justice League, and all DC lore. You write heroic stories with themes of justice, sacrifice, and the struggle between good and evil in a modern world.""",
+        "characters": ["Superman", "Batman", "Wonder Woman", "The Flash", "Green Lantern", "Aquaman"],
+        "world": "Metropolis, Gotham, Themyscira, Central City"
     }
 }
 

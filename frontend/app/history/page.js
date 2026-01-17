@@ -8,14 +8,22 @@ const universeEmojis = {
   'Harry Potter': '🪄',
   'Lord of the Rings': '💍',
   'Marvel MCU': '🦸',
-  'Star Wars': '⚡'
+  'Star Wars': '⚡',
+  'One Piece': '🏴‍☠️',
+  'Naruto': '🌀',
+  'Attack on Titan': '⚔️',
+  'DC': '🦇'
 };
 
 const universeColors = {
   'Harry Potter': { gradient: 'from-amber-600 via-red-500 to-purple-600', light: 'from-amber-100 to-red-100' },
   'Lord of the Rings': { gradient: 'from-green-700 via-emerald-600 to-slate-700', light: 'from-green-100 to-emerald-100' },
   'Marvel MCU': { gradient: 'from-red-600 via-blue-500 to-red-700', light: 'from-red-100 to-blue-100' },
-  'Star Wars': { gradient: 'from-yellow-500 via-orange-500 to-red-600', light: 'from-yellow-100 to-orange-100' }
+  'Star Wars': { gradient: 'from-yellow-500 via-orange-500 to-red-600', light: 'from-yellow-100 to-orange-100' },
+  'One Piece': { gradient: 'from-orange-600 via-red-500 to-yellow-600', light: 'from-orange-100 to-yellow-100' },
+  'Naruto': { gradient: 'from-orange-700 via-red-600 to-orange-500', light: 'from-orange-100 to-red-100' },
+  'Attack on Titan': { gradient: 'from-slate-800 via-purple-700 to-slate-900', light: 'from-slate-100 to-purple-100' },
+  'DC': { gradient: 'from-yellow-500 via-blue-600 to-red-600', light: 'from-yellow-100 to-blue-100' }
 };
 
 export default function HistoryPage() {
