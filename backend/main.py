@@ -172,8 +172,11 @@ def rate_story(story_id: int, rating: int, db: Session = Depends(get_db)):
     
     return {"message": "Rating updated", "new_rating": rating}
 
+class UniversePromptRequest(BaseModel):
+    universe: str
+
 @app.post("/universe/system-prompt")
-def generate_system_prompt(request: StoryRequest):
+def generate_system_prompt(request: UniversePromptRequest):
     """Generate a system prompt for a custom universe"""
     try:
         from story_generator import generate_universe_prompt
