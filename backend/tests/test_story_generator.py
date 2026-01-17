@@ -63,3 +63,19 @@ def test_universe_definitions():
     hp = UNIVERSES["Harry Potter"]
     assert "context" in hp
     assert "characters" in hp
+
+@patch('story_generator.Groq')
+def test_generate_universe_prompt(mock_groq_class):
+    """Test generating a system prompt for a custom universe"""
+    # Setup mock
+    mock_client = MagicMock()
+    mock_groq_class.return_value = mock_client
+    mock_completion = MagicMock()
+    mock_completion.choices[0].message.content = "System prompt content."
+    mock_client.chat.completions.create.return_value = mock_completion
+    
+    with patch.dict(os.environ, {"GROQ_API_KEY": "fake_key"}):
+        result = story_generator.generate_universe_prompt("Cyberpunk City")
+        
+    assert result == "System prompt content."
+    mock_client.chat.completions.create.assert_called_once()

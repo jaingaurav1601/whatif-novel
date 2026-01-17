@@ -325,9 +325,13 @@ def generate_custom_story(request: StoryRequest, db: Session = Depends(get_db)):
     try:
         from story_generator import generate_story_with_prompt
         
+
+        
+        system_prompt = request.system_prompt or f"You are an expert in the {request.universe} universe. Write in the style of {request.universe}."
+        
         story_text = generate_story_with_prompt(
             universe=request.universe,
-            system_prompt=request.system_prompt,
+            system_prompt=system_prompt,
             what_if=request.what_if,
             length=request.length
         )

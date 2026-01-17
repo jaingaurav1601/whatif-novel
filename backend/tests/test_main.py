@@ -60,6 +60,28 @@ def test_generate_custom_story(mock_gen, client):
     assert data["universe"] == "Custom"
     assert data["story"] == "Custom content"
 
+@patch("story_generator.generate_story_with_prompt")
+def test_generate_custom_story_no_prompt(mock_gen, client):
+    """Test custom story generation without system prompt (fallback)"""
+    mock_gen.return_value = "Fallback content"
+    
+    payload = {
+        "universe": "Blade Runner",
+        "what_if": "What if Deckard was a replicant?",
+        "length": "medium"
+        # system_prompt is MISSING
+    }
+    
+    response = client.post("/story/generate-custom", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["story"] == "Fallback content"
+    
+    # Verify mock was called with the fallback prompt
+    args, kwargs = mock_gen.call_args
+    expected_fallback = "You are an expert in the Blade Runner universe. Write in the style of Blade Runner."
+    assert kwargs["system_prompt"] == expected_fallback
+
 def test_get_history(client, test_db):
     # Add manual story to DB
     story = Story(universe="U", what_if="W", story="S", word_count=10, is_public=True)
@@ -100,3 +122,19 @@ def test_get_story_by_token(client, test_db):
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == story.id
+
+@patch("story_generator.generate_universe_prompt")
+def test_generate_universe_system_prompt(mock_gen, client):
+    """Test generating system prompt via API"""
+    mock_gen.return_value = "Generated system prompt"
+    
+    payload = {"universe": "Matrix"}
+    
+    # Since main.py does a local import, patching story_generator.generate_universe_prompt works
+    # provided story_generator is imported.
+    
+    response = client.post("/universe/system-prompt", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["universe"] == "Matrix"
+    assert data["system_prompt"] == "Generated system prompt"
