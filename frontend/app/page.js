@@ -38,6 +38,7 @@ export default function Home() {
   const [error, setError] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
   const [stats, setStats] = useState({ total: 0, avgRating: 0, totalWords: 0 });
+  const [communityStories, setCommunityStories] = useState([]);
 
   useEffect(() => {
     getUniverses().then(data => {
@@ -57,6 +58,8 @@ export default function Home() {
         : 0;
 
       setStats({ total, avgRating: avgRating.toFixed(1), totalWords });
+      // Show recent stories
+      setCommunityStories(stories.slice(0, 6));
     }).catch(() => { });
   }, []);
 
@@ -201,8 +204,8 @@ export default function Home() {
                   key={u}
                   onClick={() => setSelectedUniverse(u)}
                   className={`w-full p-4 rounded-xl text-left transition-all border-2 group relative overflow-hidden animate-fade-in ${selectedUniverse === u
-                      ? `bg-gradient-to-r ${universeColors[u]} text-white border-transparent shadow-lg scale-105`
-                      : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-600 hover:scale-102'
+                    ? `bg-gradient-to-r ${universeColors[u]} text-white border-transparent shadow-lg scale-105`
+                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-600 hover:scale-102'
                     }`}
                   style={{ animationDelay: `${idx * 50}ms` }}
                 >
@@ -255,8 +258,8 @@ export default function Home() {
                           type="button"
                           onClick={() => setLength(l.value)}
                           className={`py-4 rounded-xl font-bold transition-all border-2 ${length === l.value
-                              ? `bg-gradient-to-r ${selectedColor} text-white border-transparent shadow-lg scale-105`
-                              : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-600 hover:scale-102'
+                            ? `bg-gradient-to-r ${selectedColor} text-white border-transparent shadow-lg scale-105`
+                            : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-600 hover:scale-102'
                             }`}
                         >
                           <div className="text-2xl mb-1">{l.icon}</div>
@@ -300,6 +303,59 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Community Stories Section */}
+        {communityStories.length > 0 && !story && (
+          <div className="mb-12 animate-fade-in">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                <span className="text-4xl">🌟</span>
+                Community Stories
+              </h3>
+              <Link
+                href="/history"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl transition shadow-lg"
+              >
+                View All {stats.total} Stories →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {communityStories.map((communityStory, idx) => (
+                <Link
+                  key={communityStory.id}
+                  href="/history"
+                  className="group relative animate-fade-in"
+                  style={{ animationDelay: `${idx * 100}ms` }}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-r ${universeColors[communityStory.universe] || 'from-purple-600 to-blue-600'} rounded-2xl blur opacity-20 group-hover:opacity-30 transition`}></div>
+                  <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform">
+                    <div className="flex items-start justify-between mb-3">
+                      <span className="text-4xl group-hover:scale-110 transition-transform">{universeEmojis[communityStory.universe] || '📖'}</span>
+                      <span className="text-xs px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full font-medium">
+                        {communityStory.universe}
+                      </span>
+                    </div>
+                    <h4 className="font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition">
+                      What if {communityStory.what_if}?
+                    </h4>
+                    <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                      <span className="flex items-center gap-1">
+                        ⭐ {(communityStory.average_rating || 0).toFixed(1)}
+                      </span>
+                      <span>•</span>
+                      <span>{communityStory.word_count} words</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="text-center mt-8">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                Explore {stats.total} amazing stories created by our community!
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Story Display */}
         {story && (
