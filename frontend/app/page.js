@@ -11,21 +11,21 @@ const universeEmojis = {
   'Lord of the Rings': '💍',
   'Marvel MCU': '🦸',
   'Star Wars': '⚡',
-  'One Piece': '🏴‍☠️',
+  'One Piece': '🏴\u200D☠️',
   'Naruto': '🌀',
   'Attack on Titan': '⚔️',
   'DC': '🦇'
 };
 
 const universeColors = {
-  'Harry Potter': 'from-amber-500 via-red-500 to-purple-600',
-  'Lord of the Rings': 'from-green-600 via-emerald-500 to-teal-600',
-  'Marvel MCU': 'from-red-600 via-blue-500 to-yellow-500',
-  'Star Wars': 'from-yellow-500 via-orange-500 to-red-600',
-  'One Piece': 'from-orange-500 via-red-500 to-pink-500',
-  'Naruto': 'from-orange-600 via-yellow-500 to-red-600',
-  'Attack on Titan': 'from-gray-700 via-red-600 to-gray-900',
-  'DC': 'from-blue-600 via-yellow-500 to-red-600'
+  'Harry Potter': ['#6B0F2A', '#8B1538'],
+  'Lord of the Rings': ['#2C5530', '#3D7043'],
+  'Marvel MCU': ['#8B1538', '#D4AF37'],
+  'Star Wars': ['#1A1D2E', '#D4AF37'],
+  'One Piece': ['#2C5530', '#8B1538'],
+  'Naruto': ['#D4AF37', '#8B1538'],
+  'Attack on Titan': ['#2D3142', '#6B0F2A'],
+  'DC': ['#1A1D2E', '#8B1538']
 };
 
 export default function Home() {
@@ -62,8 +62,7 @@ export default function Home() {
         : 0;
 
       setStats({ total, avgRating: avgRating.toFixed(1), totalWords });
-      // Show more recent stories (12 instead of 6)
-      setCommunityStories(stories.slice(0, 12));
+      setCommunityStories(stories.slice(0, 8));
     }).catch(() => { });
   }, []);
 
@@ -100,12 +99,8 @@ export default function Home() {
     try {
       let result;
       if (isCustomUniverse) {
-        // If no prompt manually entered, try to generate one first or let backend handle it
         let promptToUse = customSystemPrompt;
         if (!promptToUse && customUniverseName) {
-          // Optional: auto-generate if empty. For now trust backend or user.
-          // Actually backend generate_custom_story might need prompt. 
-          // Let's ensure we have a prompt if the user didn't generate one.
           const promptRes = await generateSystemPrompt(customUniverseName);
           promptToUse = promptRes.system_prompt;
           setCustomSystemPrompt(promptToUse);
@@ -142,175 +137,189 @@ export default function Home() {
     }
   };
 
-  const selectedColor = universeColors[selectedUniverse] || 'from-purple-600 to-blue-600';
+  const selectedColors = isCustomUniverse
+    ? ['#8B1538', '#D4AF37']
+    : (universeColors[selectedUniverse] || ['#8B1538', '#D4AF37']);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 animate-gradient">
-      {/* Floating sparkles */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-gradient-to-r from-yellow-400 to-pink-400 rounded-full animate-sparkle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              opacity: 0.6
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Header */}
-      <header className="border-b border-purple-200 dark:border-purple-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent animate-shimmer">
-            ✨ What If Novel
-          </h1>
-          <div className="flex gap-3">
-            <Link
-              href="/stats"
-              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-lg transition shadow-lg"
-            >
-              📊 Stats
-            </Link>
-            <Link
-              href="/history"
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-medium rounded-lg transition shadow-lg"
-            >
-              📚 History
-            </Link>
+    <div className="min-h-screen">
+      {/* Header - Book Spine Navigation */}
+      <header className="sticky top-0 z-40 border-b-2 border-[var(--color-aged-paper)] bg-[var(--color-parchment)] backdrop-blur-sm shadow-md">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h1 className="font-display text-3xl md:text-4xl text-[var(--color-burgundy)] tracking-tight">
+                What If Novel
+              </h1>
+              <div className="hidden md:block text-[var(--color-gold)] text-sm">❦</div>
+              <p className="hidden md:block font-sans text-sm text-[var(--color-slate)] text-ornate">
+                The Alternative Library
+              </p>
+            </div>
+            <nav className="flex gap-3">
+              <Link
+                href="/stats"
+                className="font-sans px-5 py-2 bg-[var(--color-burgundy)] text-[var(--color-cream)] text-sm font-semibold tracking-wide hover:bg-[var(--color-burgundy-light)] transition-all shadow-md hover:shadow-lg border-l-2 border-[var(--color-gold)]"
+              >
+                Statistics
+              </Link>
+              <Link
+                href="/history"
+                className="font-sans px-5 py-2 bg-[var(--color-forest)] text-[var(--color-cream)] text-sm font-semibold tracking-wide hover:bg-[var(--color-forest-light)] transition-all shadow-md hover:shadow-lg border-l-2 border-[var(--color-gold)]"
+              >
+                Archive
+              </Link>
+            </nav>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12 max-w-6xl relative z-10">
-        {/* Hero Section */}
-        <div className="text-center mb-16 animate-fade-in">
-          <div className="relative inline-block mb-6">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 blur-3xl opacity-30 animate-pulse-glow"></div>
-            <h2 className="relative text-6xl md:text-7xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-              Reimagine Reality
-            </h2>
-          </div>
-          <p className="text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto mb-4 font-medium">
-            Where imagination meets AI to create infinite possibilities
-          </p>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Explore alternative storylines in your favorite universes, powered by cutting-edge AI
-          </p>
+      {/* Hero Section - Theatrical Introduction */}
+      <section className="relative py-16 md:py-24 overflow-hidden">
+        {/* Decorative Background */}
+        <div className="absolute inset-0 opacity-5 pointer-events-none">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, var(--color-burgundy) 1px, transparent 0)`,
+            backgroundSize: '40px 40px'
+          }}></div>
         </div>
 
-        {/* Stats */}
-        {stats.total > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {[
-              { icon: '📚', value: stats.total, label: 'Stories Created', gradient: 'from-blue-500 to-cyan-500' },
-              { icon: '⭐', value: stats.avgRating, label: 'Average Rating', gradient: 'from-yellow-500 to-orange-500' },
-              { icon: '📝', value: stats.totalWords.toLocaleString(), label: 'Words Written', gradient: 'from-purple-500 to-pink-500' }
-            ].map((stat, idx) => (
-              <div
-                key={stat.label}
-                className="relative group animate-fade-in"
-                style={{ animationDelay: `${idx * 100}ms` }}
-              >
-                <div className={`absolute inset-0 bg-gradient-to-r ${stat.gradient} rounded-2xl blur opacity-25 group-hover:opacity-40 transition`}></div>
-                <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform">
-                  <div className="text-4xl mb-2 animate-float" style={{ animationDelay: `${idx * 0.5}s` }}>{stat.icon}</div>
-                  <div className={`text-3xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</div>
-                </div>
+        <div className="container mx-auto px-6 relative">
+          <div className="max-w-5xl mx-auto text-center">
+            {/* Ornamental Header */}
+            <div className="mb-8 animate-fade-in-up">
+              <div className="inline-block">
+                <div className="text-[var(--color-gold)] text-4xl mb-4">❦</div>
+                <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-[var(--color-burgundy)] mb-4 leading-tight tracking-tight">
+                  Reimagine<br />Reality
+                </h2>
+                <div className="h-1 w-24 bg-[var(--color-gold)] mx-auto"></div>
               </div>
-            ))}
-          </div>
-        )}
+            </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* Universe Selection */}
-          <div className="lg:col-span-1 animate-slide-in">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <span className="text-2xl">🌌</span>
-              Choose Your Universe
-            </h3>
-            <div className="space-y-3">
-              {universes.map((u, idx) => (
-                <button
-                  key={u}
-                  onClick={() => {
-                    setSelectedUniverse(u);
-                    setIsCustomUniverse(false);
-                  }}
-                  className={`w-full p-4 rounded-xl text-left transition-all border-2 group relative overflow-hidden animate-fade-in ${!isCustomUniverse && selectedUniverse === u
-                    ? `bg-gradient-to-r ${universeColors[u]} text-white border-transparent shadow-lg scale-105`
-                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-600 hover:scale-102'
+            <p className="font-serif text-xl md:text-2xl text-[var(--color-charcoal)] max-w-3xl mx-auto mb-6 leading-relaxed animate-fade-in-up stagger-2">
+              Where imagination converges with artificial intelligence to explore infinite narrative possibilities
+            </p>
+
+            <p className="font-sans text-base text-[var(--color-slate)] max-w-2xl mx-auto animate-fade-in-up stagger-3">
+              Journey through alternative timelines in beloved fictional universes. Each story, a unique branch in the tree of infinite possibility.
+            </p>
+
+            {/* Stats Banner */}
+            {stats.total > 0 && (
+              <div className="mt-12 flex flex-wrap justify-center gap-8 animate-fade-in-up stagger-4">
+                {[
+                  { label: 'Stories Crafted', value: stats.total.toLocaleString(), symbol: '✦' },
+                  { label: 'Average Rating', value: stats.avgRating, symbol: '★' },
+                  { label: 'Words Written', value: stats.totalWords.toLocaleString(), symbol: '✎' }
+                ].map((stat, idx) => (
+                  <div key={stat.label} className="text-center">
+                    <div className="text-3xl md:text-4xl font-display text-[var(--color-burgundy)] mb-1">
+                      {stat.value}
+                    </div>
+                    <div className="text-xs font-sans text-ornate text-[var(--color-slate)]">
+                      {stat.symbol} {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content - Two Column Layout */}
+      <main className="container mx-auto px-6 pb-20 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left Sidebar - Universe Selection (Book Spines) */}
+          <aside className="lg:col-span-3 animate-slide-in-right">
+            <div className="sticky top-24">
+              <h3 className="font-display text-2xl text-[var(--color-burgundy)] mb-6 pb-3 border-b-2 border-[var(--color-gold)]">
+                Select Universe
+              </h3>
+
+              <div className="space-y-2">
+                {universes.map((u, idx) => (
+                  <button
+                    key={u}
+                    onClick={() => {
+                      setSelectedUniverse(u);
+                      setIsCustomUniverse(false);
+                    }}
+                    className={`w-full p-4 text-left transition-all border-l-4 font-sans font-semibold text-sm tracking-wide animate-fade-in-up ${
+                      !isCustomUniverse && selectedUniverse === u
+                        ? 'book-spine text-[var(--color-cream)] border-[var(--color-gold)] scale-105 shadow-lg'
+                        : 'bg-[var(--color-parchment)] text-[var(--color-charcoal)] border-[var(--color-aged-paper)] hover:border-[var(--color-burgundy)] hover:bg-[var(--color-aged-paper)] hover-lift'
                     }`}
-                  style={{ animationDelay: `${idx * 50}ms` }}
+                    style={{ animationDelay: `${idx * 0.05}s` }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{universeEmojis[u] || '📖'}</span>
+                      <span>{u}</span>
+                    </div>
+                  </button>
+                ))}
+
+                {/* Custom Universe Option */}
+                <button
+                  onClick={() => setIsCustomUniverse(true)}
+                  className={`w-full p-4 text-left transition-all border-l-4 font-sans font-semibold text-sm tracking-wide ${
+                    isCustomUniverse
+                      ? 'book-spine text-[var(--color-cream)] border-[var(--color-gold)] scale-105 shadow-lg'
+                      : 'bg-[var(--color-parchment)] text-[var(--color-charcoal)] border-[var(--color-aged-paper)] hover:border-[var(--color-burgundy)] hover:bg-[var(--color-aged-paper)] hover-lift'
+                  }`}
                 >
-                  {!isCustomUniverse && selectedUniverse === u ? null : (
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-100 dark:via-purple-900 to-transparent opacity-0 group-hover:opacity-100 transition-opacity animate-shimmer"></div>
-                  )}
-                  <div className="relative flex items-center gap-3">
-                    <span className="text-3xl group-hover:scale-110 transition-transform">{universeEmojis[u] || '🌌'}</span>
-                    <span className={`font-bold text-lg ${!isCustomUniverse && selectedUniverse === u ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                      {u}
-                    </span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">✨</span>
+                    <span>Custom Universe</span>
                   </div>
                 </button>
-              ))}
-
-              {/* Custom Universe Button */}
-              <button
-                onClick={() => setIsCustomUniverse(true)}
-                className={`w-full p-4 rounded-xl text-left transition-all border-2 group relative overflow-hidden animate-fade-in ${isCustomUniverse
-                  ? 'bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white border-transparent shadow-lg scale-105'
-                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-600 hover:scale-102'
-                  }`}
-              >
-                <div className="relative flex items-center gap-3">
-                  <span className="text-3xl group-hover:scale-110 transition-transform">✨</span>
-                  <span className={`font-bold text-lg ${isCustomUniverse ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                    Custom Universe
-                  </span>
-                </div>
-              </button>
+              </div>
             </div>
-          </div>
+          </aside>
 
-          {/* Generator Form */}
-          <div className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <div className="relative group">
-              <div className={`absolute inset-0 bg-gradient-to-r ${isCustomUniverse ? 'from-pink-500 via-purple-500 to-indigo-500' : selectedColor} rounded-2xl blur opacity-20 group-hover:opacity-30 transition`}></div>
-              <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
-                <form onSubmit={handleGenerateStory} className="space-y-6">
+          {/* Main Content - Story Generator */}
+          <section className="lg:col-span-9 animate-fade-in-up stagger-2">
+            <div className="paper-card p-8 md:p-12 relative">
+              {/* Decorative Corner */}
+              <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-[var(--color-gold)] opacity-30"></div>
+              <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-[var(--color-gold)] opacity-30"></div>
 
+              <div className="relative z-10">
+                <div className="text-center mb-10">
+                  <h2 className="font-display text-4xl md:text-5xl text-[var(--color-burgundy)] mb-3">
+                    Craft Your Story
+                  </h2>
+                  <div className="w-20 h-1 bg-[var(--color-gold)] mx-auto"></div>
+                </div>
+
+                <form onSubmit={handleGenerateStory} className="space-y-8">
+                  {/* Custom Universe Fields */}
                   {isCustomUniverse && (
-                    <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 animate-slide-in">
+                    <div className="p-6 border-2 border-[var(--color-aged-paper)] bg-[var(--color-parchment)] animate-fade-in-up space-y-5">
                       <div>
-                        <label className="block text-sm font-bold text-gray-900 dark:text-white mb-2">
+                        <label className="block font-sans font-semibold text-sm text-ornate text-[var(--color-burgundy)] mb-3">
                           Universe Name
                         </label>
                         <input
                           type="text"
                           value={customUniverseName}
                           onChange={(e) => setCustomUniverseName(e.target.value)}
-                          placeholder="e.g. Cyberpunk 2077, Dune, My Original World"
-                          className="w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none"
+                          placeholder="e.g., Cyberpunk 2077, Dune, Your Original World"
+                          className="w-full px-5 py-3 font-serif bg-[var(--color-cream)] text-[var(--color-midnight)] border-2 border-[var(--color-aged-paper)] focus:border-[var(--color-burgundy)] focus:outline-none transition-colors"
                         />
                       </div>
+
                       <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <label className="block text-sm font-bold text-gray-900 dark:text-white">
+                        <div className="flex justify-between items-center mb-3">
+                          <label className="block font-sans font-semibold text-sm text-ornate text-[var(--color-burgundy)]">
                             System Prompt (Optional)
                           </label>
                           <button
                             type="button"
                             onClick={handleGenerateSystemPrompt}
                             disabled={!customUniverseName || promptLoading}
-                            className="text-xs px-3 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 rounded-full hover:bg-purple-200 dark:hover:bg-purple-800 transition disabled:opacity-50"
+                            className="font-sans text-xs px-4 py-1 bg-[var(--color-burgundy)] text-[var(--color-cream)] hover:bg-[var(--color-burgundy-light)] transition disabled:opacity-50"
                           >
                             {promptLoading ? 'Generating...' : '✨ Auto-Generate'}
                           </button>
@@ -318,130 +327,124 @@ export default function Home() {
                         <textarea
                           value={customSystemPrompt}
                           onChange={(e) => setCustomSystemPrompt(e.target.value)}
-                          placeholder="Describe the world, rules, and tone..."
-                          className="w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none min-h-[100px] text-sm"
+                          placeholder="Describe the world, characters, and narrative rules..."
+                          className="w-full px-5 py-3 font-serif text-sm bg-[var(--color-cream)] text-[var(--color-midnight)] border-2 border-[var(--color-aged-paper)] focus:border-[var(--color-burgundy)] focus:outline-none min-h-[100px] transition-colors"
                         />
                       </div>
                     </div>
                   )}
+
+                  {/* What If Scenario */}
                   <div>
-                    <label className="block text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                      <span className="text-2xl">💭</span>
-                      What If Scenario
+                    <label className="block font-sans font-semibold text-sm text-ornate text-[var(--color-burgundy)] mb-3">
+                      ✦ Your "What If" Scenario
                     </label>
                     <textarea
                       value={whatIf}
                       onChange={(e) => setWhatIf(e.target.value)}
-                      placeholder="What if Harry Potter was sorted into Slytherin? What if Gandalf never came to Middle-earth?"
-                      className="w-full px-4 py-4 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 border-2 border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 outline-none min-h-[140px] resize-none transition text-lg"
+                      placeholder="What if Harry Potter was sorted into Slytherin? What if Gandalf never came to Middle-earth? What if Tony Stark never became Iron Man?"
+                      className="w-full px-5 py-4 font-serif text-lg bg-[var(--color-cream)] text-[var(--color-midnight)] border-2 border-[var(--color-aged-paper)] focus:border-[var(--color-burgundy)] focus:outline-none min-h-[140px] resize-none transition-colors"
                     />
                   </div>
 
+                  {/* Story Length */}
                   <div>
-                    <label className="block text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                      <span className="text-2xl">📏</span>
-                      Story Length
+                    <label className="block font-sans font-semibold text-sm text-ornate text-[var(--color-burgundy)] mb-4">
+                      ✦ Narrative Length
                     </label>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 gap-4">
                       {[
-                        { value: 'short', icon: '⚡', label: 'Quick' },
-                        { value: 'medium', icon: '📖', label: 'Standard' },
-                        { value: 'long', icon: '📚', label: 'Epic' }
-                      ].map((l) => (
+                        { value: 'short', label: 'Brief Tale', desc: '~300 words' },
+                        { value: 'medium', label: 'Standard Chapter', desc: '~600 words' },
+                        { value: 'long', label: 'Epic Saga', desc: '~1000 words' }
+                      ].map((opt) => (
                         <button
-                          key={l.value}
+                          key={opt.value}
                           type="button"
-                          onClick={() => setLength(l.value)}
-                          className={`py-4 rounded-xl font-bold transition-all border-2 ${length === l.value
-                            ? `bg-gradient-to-r ${selectedColor} text-white border-transparent shadow-lg scale-105`
-                            : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-600 hover:scale-102'
-                            }`}
+                          onClick={() => setLength(opt.value)}
+                          className={`p-5 border-2 font-sans transition-all ${
+                            length === opt.value
+                              ? 'border-[var(--color-burgundy)] bg-[var(--color-burgundy)] text-[var(--color-cream)] shadow-lg scale-105'
+                              : 'border-[var(--color-aged-paper)] bg-[var(--color-parchment)] text-[var(--color-charcoal)] hover:border-[var(--color-burgundy)] hover-lift'
+                          }`}
                         >
-                          <div className="text-2xl mb-1">{l.icon}</div>
-                          {l.label}
+                          <div className="font-bold text-base mb-1">{opt.label}</div>
+                          <div className="text-xs opacity-75">{opt.desc}</div>
                         </button>
                       ))}
                     </div>
                   </div>
 
+                  {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full bg-gradient-to-r ${selectedColor} hover:opacity-90 text-white font-bold py-5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl text-lg relative overflow-hidden group/btn`}
+                    className="btn-vintage w-full text-lg py-5 disabled:opacity-50 disabled:cursor-not-allowed font-sans"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover/btn:opacity-20 animate-shimmer"></div>
-                    <span className="relative flex items-center justify-center gap-3">
-                      {loading ? (
-                        <>
-                          <svg className="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Weaving Your Story...
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-2xl">✨</span>
-                          Generate Story
-                        </>
-                      )}
-                    </span>
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-3">
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Weaving Your Narrative...
+                      </span>
+                    ) : (
+                      <span>✦ Generate Story ✦</span>
+                    )}
                   </button>
 
+                  {/* Error Message */}
                   {error && (
-                    <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl font-medium">
+                    <div className="p-4 bg-red-50 border-2 border-red-300 text-red-700 font-sans text-sm">
                       {error}
                     </div>
                   )}
                 </form>
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
         {/* Community Stories Section */}
         {communityStories.length > 0 && !story && (
-          <div className="mb-12 animate-fade-in">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                  <span className="text-4xl">🌟</span>
-                  Community Stories
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  Explore recent creations from our community
-                </p>
+          <section className="mt-20 animate-fade-in-up stagger-5">
+            <div className="text-center mb-12">
+              <div className="ornamental-divider">
+                <span>❦</span>
               </div>
-              <Link
-                href="/history"
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl transition shadow-lg"
-              >
-                View All {stats.total} Stories →
-              </Link>
+              <h2 className="font-display text-4xl md:text-5xl text-[var(--color-burgundy)] mb-4">
+                Recent Chronicles
+              </h2>
+              <p className="font-serif text-lg text-[var(--color-slate)] max-w-2xl mx-auto">
+                Explore the latest narrative branches crafted by our community of storytellers
+              </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
               {communityStories.map((communityStory, idx) => (
                 <Link
                   key={communityStory.id}
                   href="/history"
-                  className="group relative animate-fade-in"
-                  style={{ animationDelay: `${idx * 100}ms` }}
+                  className="paper-card p-6 hover-lift group animate-fade-in-up"
+                  style={{ animationDelay: `${idx * 0.1}s` }}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-r ${universeColors[communityStory.universe] || 'from-purple-600 to-blue-600'} rounded-2xl blur opacity-20 group-hover:opacity-30 transition`}></div>
-                  <div className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform">
-                    <div className="flex items-start justify-between mb-3">
-                      <span className="text-4xl group-hover:scale-110 transition-transform">{universeEmojis[communityStory.universe] || '📖'}</span>
-                      <span className="text-xs px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full font-medium">
+                  <div className="relative z-10">
+                    <div className="flex items-start justify-between mb-4">
+                      <span className="text-4xl group-hover:scale-110 transition-transform">
+                        {universeEmojis[communityStory.universe] || '📖'}
+                      </span>
+                      <span className="universe-badge text-xs">
                         {communityStory.universe}
                       </span>
                     </div>
-                    <h4 className="font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition">
+
+                    <h3 className="font-serif font-bold text-base text-[var(--color-midnight)] mb-3 line-clamp-2 group-hover:text-[var(--color-burgundy)] transition">
                       What if {communityStory.what_if}?
-                    </h4>
-                    <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                      <span className="flex items-center gap-1">
-                        ⭐ {(communityStory.average_rating || 0).toFixed(1)}
-                      </span>
+                    </h3>
+
+                    <div className="flex items-center gap-4 font-sans text-xs text-[var(--color-slate)]">
+                      <span>★ {(communityStory.average_rating || 0).toFixed(1)}</span>
                       <span>•</span>
                       <span>{communityStory.word_count} words</span>
                     </div>
@@ -449,47 +452,35 @@ export default function Home() {
                 </Link>
               ))}
             </div>
-            <div className="text-center mt-8">
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Explore {stats.total} amazing stories created by our community!
-              </p>
+
+            <div className="text-center">
+              <Link
+                href="/history"
+                className="inline-block btn-vintage font-sans"
+              >
+                Explore All {stats.total} Stories →
+              </Link>
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Story Display */}
+        {/* Story Display - Theatrical Reveal */}
         {story && (
-          <div id="story-section" className="animate-fade-in">
-            <div className="relative group/story">
-              <div className={`absolute inset-0 bg-gradient-to-r ${universeColors[story.universe]} rounded-3xl blur-xl opacity-30 group-hover/story:opacity-40 transition`}></div>
-              <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
-                {/* Story Header */}
-                <div className={`bg-gradient-to-r ${universeColors[story.universe]} text-white p-10 relative overflow-hidden`}>
-                  <div className="absolute inset-0 opacity-10">
-                    {[...Array(10)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="absolute rounded-full bg-white animate-float"
-                        style={{
-                          width: `${Math.random() * 100 + 50}px`,
-                          height: `${Math.random() * 100 + 50}px`,
-                          left: `${Math.random() * 100}%`,
-                          top: `${Math.random() * 100}%`,
-                          animationDelay: `${i * 0.5}s`
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <div className="relative flex items-start justify-between mb-6">
+          <div id="story-section" className="mt-20 animate-book-open">
+            <div className="paper-card overflow-hidden max-w-5xl mx-auto">
+              {/* Story Header - Curtain Style */}
+              <div className="curtain text-[var(--color-cream)] p-12 relative">
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between mb-6">
                     <div>
-                      <div className="text-6xl mb-4 animate-float">{universeEmojis[story.universe]}</div>
-                      <span className="inline-block bg-white/20 backdrop-blur px-4 py-2 rounded-full text-sm font-bold border border-white/30">
+                      <div className="text-6xl mb-4">{universeEmojis[story.universe]}</div>
+                      <span className="inline-block px-4 py-2 bg-black/20 backdrop-blur border border-white/30 font-sans text-sm font-semibold tracking-wide">
                         {story.universe}
                       </span>
                     </div>
                     <button
                       onClick={() => setShowShareModal(true)}
-                      className="bg-white/20 hover:bg-white/30 backdrop-blur px-6 py-3 rounded-xl font-bold transition flex items-center gap-2 border border-white/30"
+                      className="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur border border-white/30 font-sans font-semibold tracking-wide transition flex items-center gap-2"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -497,59 +488,60 @@ export default function Home() {
                       Share
                     </button>
                   </div>
-                  <h2 className="text-4xl font-black mb-3 leading-tight">
+
+                  <h2 className="font-display text-4xl md:text-5xl mb-4 leading-tight">
                     What if {story.what_if}?
                   </h2>
-                  <div className="flex items-center gap-4 text-lg font-medium">
+
+                  <div className="flex items-center gap-4 font-sans text-sm font-medium">
                     <span>{story.word_count} words</span>
                     <span>•</span>
                     <span>{story.rating_count} {story.rating_count === 1 ? 'rating' : 'ratings'}</span>
                   </div>
                 </div>
+              </div>
 
-                {/* Story Content */}
-                <div className="p-10">
-                  <div className="prose prose-lg max-w-none dark:prose-invert mb-10">
-                    {story.story.split('\n').map((paragraph, i) => (
-                      paragraph.trim() && (
-                        <p key={i} className="mb-5 text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
-                          {paragraph}
-                        </p>
-                      )
-                    ))}
-                  </div>
+              {/* Story Content */}
+              <div className="p-12 relative">
+                <div className="prose prose-lg max-w-none mb-12">
+                  {story.story.split('\n').map((paragraph, i) => (
+                    paragraph.trim() && (
+                      <p key={i} className="mb-6 font-serif text-lg text-[var(--color-midnight)] leading-relaxed first-letter:text-5xl first-letter:font-display first-letter:text-[var(--color-burgundy)] first-letter:float-left first-letter:mr-2 first-letter:mt-1">
+                        {paragraph}
+                      </p>
+                    )
+                  ))}
+                </div>
 
-                  {/* Rating Section */}
-                  <div className="border-t-2 border-gray-200 dark:border-gray-700 pt-10">
-                    <div className="max-w-lg mx-auto">
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 text-center flex items-center justify-center gap-2">
-                        <span className="text-3xl">⭐</span>
-                        Rate This Story
-                      </h3>
-                      <RatingDisplay
-                        storyId={story.id}
-                        initialRating={story.average_rating || 0}
-                        initialCount={story.rating_count || 0}
-                        onRate={handleRating}
-                      />
-                    </div>
+                {/* Rating Section */}
+                <div className="border-t-2 border-[var(--color-aged-paper)] pt-10">
+                  <div className="max-w-lg mx-auto">
+                    <h3 className="font-display text-3xl text-[var(--color-burgundy)] mb-8 text-center">
+                      Rate This Story
+                    </h3>
+                    <RatingDisplay
+                      storyId={story.id}
+                      initialRating={story.average_rating || 0}
+                      initialCount={story.rating_count || 0}
+                      onRate={handleRating}
+                    />
                   </div>
+                </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-4 justify-center mt-10">
-                    <Link
-                      href="/history"
-                      className="px-8 py-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-bold rounded-xl transition shadow-lg"
-                    >
-                      📚 View All Stories
-                    </Link>
-                    <button
-                      onClick={() => setStory(null)}
-                      className={`px-8 py-4 bg-gradient-to-r ${selectedColor} hover:opacity-90 text-white font-bold rounded-xl transition shadow-lg`}
-                    >
-                      ✨ Create Another
-                    </button>
-                  </div>
+                {/* Actions */}
+                <div className="flex flex-wrap gap-4 justify-center mt-10">
+                  <Link
+                    href="/history"
+                    className="px-8 py-4 bg-[var(--color-forest)] text-[var(--color-cream)] font-sans font-semibold tracking-wide hover:bg-[var(--color-forest-light)] transition shadow-md hover:shadow-lg"
+                  >
+                    View Archive
+                  </Link>
+                  <button
+                    onClick={() => setStory(null)}
+                    className="btn-vintage px-8 py-4 font-sans"
+                  >
+                    ✦ Create Another ✦
+                  </button>
                 </div>
               </div>
             </div>
