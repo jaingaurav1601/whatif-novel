@@ -284,7 +284,7 @@ export default function HistoryPage() {
               <div className="prose prose-lg max-w-none mb-10">
                 {selectedStory.story.split('\n').map((paragraph, i) => (
                   paragraph.trim() && (
-                    <p key={i} className="mb-5 font-serif text-lg text-[var(--color-midnight)] leading-relaxed first-letter:text-5xl first-letter:font-display first-letter:text-[var(--color-burgundy)] first-letter:float-left first-letter:mr-2 first-letter:mt-1">
+                    <p key={i} className={`mb-5 font-serif text-lg text-[var(--color-midnight)] leading-relaxed ${i === 0 ? 'first-letter:text-5xl first-letter:font-display first-letter:text-[var(--color-burgundy)] first-letter:float-left first-letter:mr-2 first-letter:mt-1' : ''}`}>
                       {paragraph}
                     </p>
                   )
