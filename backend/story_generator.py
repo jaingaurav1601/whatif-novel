@@ -1,17 +1,17 @@
-from groq import Groq
+from openai import OpenAI
 import os
 
 
 def _get_client():
-    """Return a Groq client built from the GROQ_API_KEY env var.
+    """Return an OpenAI client built from the OPENAI_API_KEY env var.
 
     This defers client creation until it's actually needed so importing this
     module (e.g. to list universes) doesn't require the API key to be set.
     """
-    api_key = os.getenv("GROQ_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        raise ValueError("GROQ_API_KEY environment variable is not set")
-    return Groq(api_key=api_key)
+        raise ValueError("OPENAI_API_KEY environment variable is not set")
+    return OpenAI(api_key=api_key)
 
 # Universe knowledge bases
 UNIVERSES = {
@@ -90,7 +90,7 @@ Begin the story now:"""
     client = _get_client()
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are a creative writer who specializes in alternative universe fiction."},
             {"role": "user", "content": prompt}
@@ -127,9 +127,9 @@ The system prompt should:
 Format the response as a complete system prompt that can be used directly with an AI model. Start with "You are an expert in the {universe_name} universe..." and make it comprehensive but concise (150-200 words)."""
     
     client = _get_client()
-    
+
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are an expert at creating detailed system prompts for creative AI writers."},
             {"role": "user", "content": prompt}
@@ -162,9 +162,9 @@ Guidelines:
 Begin the story now:"""
     
     client = _get_client()
-    
+
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt}

@@ -5,7 +5,7 @@ Generate alternative storylines in your favorite fictional universes using AI.
 ## Features
 
 - 🎬 **Multiple Universes**: Harry Potter, Lord of the Rings, Marvel MCU, Star Wars
-- ✨ **AI-Powered Stories**: Uses Groq API with advanced LLMs to generate creative alternate universes
+- ✨ **AI-Powered Stories**: Uses OpenAI GPT-4o mini to generate creative alternate universes
 - ⭐ **Rating System**: Rate and review generated stories
 - 📚 **Story History**: Browse and filter all past generated stories
 - 🎨 **Beautiful UI**: Modern gradient design with smooth animations
@@ -18,7 +18,7 @@ whatif-novel/
 ├── backend/           # Python FastAPI server
 │   ├── main.py       # FastAPI app with endpoints
 │   ├── database.py   # SQLAlchemy models and DB config
-│   ├── story_generator.py  # Groq API integration
+│   ├── story_generator.py  # OpenAI API integration
 │   ├── requirements.txt
 │   ├── .env.example
 │   └── .gitignore
@@ -37,7 +37,7 @@ whatif-novel/
 ### Prerequisites
 - Python 3.11+
 - Node.js 18+
-- Groq API Key (get from https://console.groq.com)
+- OpenAI API Key (get from https://platform.openai.com/api-keys)
 
 ### Backend Setup
 
@@ -56,7 +56,7 @@ pip install -r requirements.txt
 3. Set up environment variables:
 ```bash
 cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
+# Edit .env and add your OPENAI_API_KEY
 ```
 
 4. Run the server:
@@ -145,7 +145,7 @@ Get top-rated stories.
 
 ### Backend (.env)
 ```
-GROQ_API_KEY=your_api_key_here
+OPENAI_API_KEY=your_api_key_here
 DATABASE_URL=sqlite:///./whatif.db  # Optional, defaults to SQLite
 ```
 
@@ -169,7 +169,7 @@ cd backend
 **Backend:**
 - FastAPI - Modern Python web framework
 - SQLAlchemy - ORM and database toolkit
-- Groq - API for AI models
+- OpenAI - GPT-4o mini for AI story generation
 - Uvicorn - ASGI web server
 
 **Frontend:**
